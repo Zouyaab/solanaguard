@@ -1,0 +1,19 @@
+{
+  "name": "@solanaguard/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "solanaguard": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@solanaguard/config": "workspace:*",
+    "@solanaguard/solana": "workspace:*",
+    "@solanaguard/types": "workspace:*",
+    "@solanaguard/analyzer": "workspace:*"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@solanaguard/solana",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "dependencies": {
+    "@solanaguard/config": "workspace:*",
+    "@solana/web3.js": "^1.98.2",
+    "bs58": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/bs58": "^4.0.4"
+  }
+}
