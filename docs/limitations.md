@@ -38,6 +38,12 @@ This document exists so SolanaGuard does not over-claim.
 - The tool does not recover seeds and does not claim that a key "is a PDA".
 - Off-curve required signers are unusual for Ed25519. That is not by itself evidence of malice.
 
+## Phase 7
+
+- Deterministic rules emit findings. An empty list means no built-in rule fired, not that the transaction is safe.
+- There is no numeric score yet.
+- Unknown programs and missing accounts still mean incomplete data.
+
 ## Permanent technical limits (later phases must still respect these)
 
 - We cannot recover arbitrary PDA seeds from an address.

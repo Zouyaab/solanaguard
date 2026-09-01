@@ -7,6 +7,7 @@
   "include": ["src"],
   "references": [
     { "path": "../packages/analyzer" },
+    { "path": "../packages/risk-engine" },
     { "path": "../packages/config" },
     { "path": "../packages/solana" },
     { "path": "../packages/types" }

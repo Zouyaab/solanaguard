@@ -19,4 +19,10 @@ describe("CLI", () => {
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toMatch(/Usage: solanaguard normalize/i);
   });
+
+  it("requires flags for rules", async () => {
+    const result = await runCli(["rules"]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toMatch(/Usage: solanaguard rules/i);
+  });
 });

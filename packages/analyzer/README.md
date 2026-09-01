@@ -28,4 +28,4 @@ Unknown programs stay `decoded: false` with `decodeStatus: "unknown_program"`. M
 
 - It does not decide if a transaction is safe.
 - It does not recover PDA seeds or prove that a key is a PDA.
-- It does not run risk rules.
+- It does not run risk rules (that is `@solanaguard/risk-engine`).

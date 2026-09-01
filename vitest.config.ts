@@ -22,6 +22,9 @@ export default defineConfig({
       "@solanaguard/analyzer": fileURLToPath(
         new URL("./packages/analyzer/src/index.ts", import.meta.url),
       ),
+      "@solanaguard/risk-engine": fileURLToPath(
+        new URL("./packages/risk-engine/src/index.ts", import.meta.url),
+      ),
     },
   },
 });

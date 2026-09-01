@@ -1,7 +1,11 @@
 # @solanaguard/risk-engine
 
-**Status: not implemented (Phases 7–8).**
+**Phase 7:** deterministic rule framework. **Not** a score, **not** a safety verdict.
 
-Deterministic rules and explainable scoring. No AI.
+Rules are pure functions over a `NormalizedTransaction`. They emit findings (`info`, `unusual`, `needs_review`). They must not call RPC and must not use the words safe, secure, or malicious as a verdict.
 
-It does not exist yet. Do not import it.
+Built-in rules cover unknown programs, unrecognized layouts, unresolved lookup/program ids, off-curve required signers, missing cluster accounts (when resolution ran), and unsigned messages.
+
+Override a rule by `id` with `mergeRules(defaultRiskRules, extras)`.
+
+Scoring is Phase 8 and is not implemented here.

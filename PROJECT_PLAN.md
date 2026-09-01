@@ -2,7 +2,7 @@
 
 This is the working delivery plan. Each phase is only "done" when install/build/lint/tests for that phase pass, and no unimplemented capability is described as working.
 
-## Current phase: 6 (PDA / off-curve classification)
+## Current phase: 7 (risk rules framework)
 
 **Do not start later phases until the operator says `continue`.**
 
@@ -56,7 +56,7 @@ AI: **out of MVP**. Optional explanation later; cannot override rules.
 | 4     | Instruction parser + decoder plugins                        | **done (verified locally)** |
 | 5     | Account resolution                                          | **done (verified locally)** |
 | 6     | PDA / off-curve classification (no false malice)            | **done (verified locally)** |
-| 7     | Risk rules framework                                        | pending                     |
+| 7     | Risk rules framework                                        | **done (verified locally)** |
 | 8     | Transparent scoring                                         | pending                     |
 | 9     | Simulation normalization                                    | pending                     |
 | 10    | Expected vs simulated behavior                              | pending                     |
@@ -114,6 +114,15 @@ AI: **out of MVP**. Optional explanation later; cannot override rules.
 - Seeds are not recovered; the tool does not claim a key "is a PDA"
 - Required signers that are off-curve are flagged as unusual, not malicious
 - Docs keep the same language
+
+## Phase 7 definition of done
+
+- Rules are pure functions over `NormalizedTransaction` (no RPC inside the engine)
+- Built-in rules emit `info` / `unusual` / `needs_review` findings
+- Unknown programs, unresolved ids, off-curve signers, and missing accounts are not described as malice
+- There is no numeric score
+- `POST /api/v1/transactions/evaluate-rules` and `solanaguard rules` work
+- Docs do not treat an empty findings list as "safe"
 
 ## Language rules (permanent)
 

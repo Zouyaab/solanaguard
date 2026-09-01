@@ -4,7 +4,13 @@ import {
   normalizeTransaction,
   TransactionNotFoundError,
 } from "@solanaguard/analyzer";
-import { SOLANAGUARD_NAME, SOLANAGUARD_VERSION, type HealthStatus } from "@solanaguard/types";
+import { evaluateRules } from "@solanaguard/risk-engine";
+import {
+  SOLANAGUARD_NAME,
+  SOLANAGUARD_VERSION,
+  type HealthStatus,
+  type NormalizedTransaction,
+} from "@solanaguard/types";
 import {
   InvalidAddressError,
   InvalidTransactionError,
@@ -68,8 +74,8 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     return {
       name: SOLANAGUARD_NAME,
       version: SOLANAGUARD_VERSION,
-      phase: 6,
-      note: "Phase 6 classifies Ed25519 on-curve vs off-curve account keys. Off-curve is common for program-derived addresses and is not evidence of malice. Seeds are not recovered. Risk analysis is not implemented yet.",
+      phase: 7,
+      note: "Phase 7 evaluates deterministic rules over a normalized transaction. Findings may require review. They are not a risk score, not a safety verdict, and not evidence of malice. Transparent scoring is not implemented yet.",
     };
   });
 
@@ -131,48 +137,66 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     },
   );
 
-  app.post("/api/v1/transactions/normalize", async (request, reply) => {
-    const body = request.body;
+  async function normalizeFromBody(
+    body: unknown,
+    reply: FastifyReply,
+  ): Promise<NormalizedTransaction | null> {
     if (body === null || typeof body !== "object" || Array.isArray(body)) {
-      return reply.code(400).send({
+      await reply.code(400).send({
         error: "invalid_request",
         message: "JSON body must be an object with base64 or signature.",
       });
+      return null;
     }
     const record = body as Record<string, unknown>;
     const base64 = record.base64;
     const signature = record.signature;
     if (typeof base64 === "string" && typeof signature === "string") {
-      return reply.code(400).send({
+      await reply.code(400).send({
         error: "invalid_request",
         message: "Provide either base64 or signature, not both.",
       });
+      return null;
     }
     try {
       if (typeof base64 === "string") {
-        const transaction = await normalizeTransaction(
-          { source: "base64", base64 },
-          rpc ? { rpc } : undefined,
-        );
-        return { transaction };
+        return await normalizeTransaction({ source: "base64", base64 }, rpc ? { rpc } : undefined);
       }
       if (typeof signature === "string") {
         if (!rpc) {
-          return reply.code(503).send({
+          await reply.code(503).send({
             error: "rpc_not_configured",
             message: "This process was started without a Solana RPC client.",
           });
+          return null;
         }
-        const transaction = await normalizeTransaction({ source: "signature", signature }, { rpc });
-        return { transaction };
+        return await normalizeTransaction({ source: "signature", signature }, { rpc });
       }
-      return reply.code(400).send({
+      await reply.code(400).send({
         error: "invalid_request",
         message: "JSON body must include string field base64 or signature.",
       });
+      return null;
     } catch (error) {
-      return sendRpcError(reply, error);
+      await sendRpcError(reply, error);
+      return null;
     }
+  }
+
+  app.post("/api/v1/transactions/normalize", async (request, reply) => {
+    const transaction = await normalizeFromBody(request.body, reply);
+    if (!transaction) {
+      return;
+    }
+    return { transaction };
+  });
+
+  app.post("/api/v1/transactions/evaluate-rules", async (request, reply) => {
+    const transaction = await normalizeFromBody(request.body, reply);
+    if (!transaction) {
+      return;
+    }
+    return { transaction, evaluation: evaluateRules(transaction) };
   });
 
   return app;

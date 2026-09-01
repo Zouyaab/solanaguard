@@ -28,7 +28,7 @@ function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
   return new SolanaRpc(adapter, "https://api.devnet.solana.com");
 }
 
-describe("API Phase 6", { timeout: 60_000 }, () => {
+describe("API Phase 7", { timeout: 60_000 }, () => {
   it("GET /api/v1/health still reports process health only", async () => {
     const app = buildApp();
     const response = await app.inject({ method: "GET", url: "/api/v1/health" });
@@ -45,8 +45,9 @@ describe("API Phase 6", { timeout: 60_000 }, () => {
     const response = await app.inject({ method: "GET", url: "/api/v1/version" });
     expect(response.statusCode).toBe(200);
     const body = response.json() as { phase: number; note: string };
-    expect(body.phase).toBe(6);
-    expect(body.note).toMatch(/not implemented/i);
+    expect(body.phase).toBe(7);
+    expect(body.note).toMatch(/not a risk score/i);
+    expect(body.note).toMatch(/scoring is not implemented/i);
     await app.close();
   });
 
@@ -115,6 +116,27 @@ describe("API Phase 6", { timeout: 60_000 }, () => {
     expect(body.transaction.instructions[0]?.instructionType).toBe("Transfer");
     expect(body.transaction.accountResolution.attempted).toBe(true);
     expect(body.transaction.curveClassification.signerOffCurve).toBe(0);
+    await app.close();
+  });
+
+  it("POST /api/v1/transactions/evaluate-rules returns findings without a score", async () => {
+    const app = buildApp({ rpc: mockRpc() });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/transactions/evaluate-rules",
+      payload: {
+        base64:
+          "Aecq9mMF4htQuahqnrKRXHzGPmtuxSNj3PCHqwV+aESk4I3P/1AGM7tneIzgF4eNbTZwmDDTGz4rED2UfyWGtgKAAQABAwafd7Wj1Am+2iNI3JDf0BDwxjcevjSU6u+w7PElwShXB8c/1UTJwIVBcsnyguiJJXGSUgVkHRojpkD+x44QnbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQICAAEMAgAAAAEAAAAAAAAAAA==",
+      },
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as {
+      evaluation: { findings: unknown[]; note: string; rulesEvaluated: number };
+    };
+    expect(body.evaluation.rulesEvaluated).toBeGreaterThan(0);
+    expect(body.evaluation.note).toMatch(/not a risk score/i);
+    expect(body.evaluation).not.toHaveProperty("score");
+    expect(JSON.stringify(body.evaluation)).not.toMatch(/malicious/i);
     await app.close();
   });
 

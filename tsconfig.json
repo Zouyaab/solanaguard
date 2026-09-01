@@ -5,6 +5,7 @@
     { "path": "./packages/config" },
     { "path": "./packages/solana" },
     { "path": "./packages/analyzer" },
+    { "path": "./packages/risk-engine" },
     { "path": "./apps/api" },
     { "path": "./cli" }
   ]

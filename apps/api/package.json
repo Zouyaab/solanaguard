@@ -13,6 +13,7 @@
     "@solanaguard/solana": "workspace:*",
     "@solanaguard/types": "workspace:*",
     "@solanaguard/analyzer": "workspace:*",
+    "@solanaguard/risk-engine": "workspace:*",
     "fastify": "^5.2.1"
   },
   "devDependencies": {

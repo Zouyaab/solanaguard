@@ -41,6 +41,9 @@ importers:
       '@solanaguard/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@solanaguard/risk-engine':
+        specifier: workspace:*
+        version: link:../../packages/risk-engine
       '@solanaguard/solana':
         specifier: workspace:*
         version: link:../../packages/solana
@@ -63,6 +66,9 @@ importers:
       '@solanaguard/config':
         specifier: workspace:*
         version: link:../packages/config
+      '@solanaguard/risk-engine':
+        specifier: workspace:*
+        version: link:../packages/risk-engine
       '@solanaguard/solana':
         specifier: workspace:*
         version: link:../packages/solana
@@ -90,6 +96,12 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
+
+  packages/risk-engine:
+    dependencies:
+      '@solanaguard/types':
+        specifier: workspace:*
+        version: link:../types
 
   packages/solana:
     dependencies:

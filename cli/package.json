@@ -14,6 +14,7 @@
     "@solanaguard/config": "workspace:*",
     "@solanaguard/solana": "workspace:*",
     "@solanaguard/types": "workspace:*",
-    "@solanaguard/analyzer": "workspace:*"
+    "@solanaguard/analyzer": "workspace:*",
+    "@solanaguard/risk-engine": "workspace:*"
   }
 }

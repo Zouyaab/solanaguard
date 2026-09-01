@@ -4,6 +4,7 @@ import {
   normalizeTransaction,
   TransactionNotFoundError,
 } from "@solanaguard/analyzer";
+import { evaluateRules } from "@solanaguard/risk-engine";
 import { createSolanaRpc, InvalidAddressError, InvalidTransactionError } from "@solanaguard/solana";
 import { SOLANAGUARD_NAME, SOLANAGUARD_VERSION } from "@solanaguard/types";
 
@@ -103,10 +104,53 @@ export async function runCli(argv: readonly string[]): Promise<CliResult> {
     };
   }
 
+  if (command === "rules") {
+    const flag = argv[1];
+    const value = argv[2];
+    if (flag === "--base64" && value) {
+      try {
+        const rpc = createSolanaRpc(loadConfig());
+        const transaction = await normalizeTransaction(
+          { source: "base64", base64: value },
+          { rpc },
+        );
+        const evaluation = evaluateRules(transaction);
+        return { stdout: `${JSON.stringify({ transaction, evaluation }, null, 2)}\n`, exitCode: 0 };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return { stdout: `${message}\n`, exitCode: 1 };
+      }
+    }
+    if (flag === "--signature" && value) {
+      try {
+        const rpc = createSolanaRpc(loadConfig());
+        const transaction = await normalizeTransaction(
+          { source: "signature", signature: value },
+          { rpc },
+        );
+        const evaluation = evaluateRules(transaction);
+        return { stdout: `${JSON.stringify({ transaction, evaluation }, null, 2)}\n`, exitCode: 0 };
+      } catch (error) {
+        if (error instanceof TransactionNotFoundError) {
+          return { stdout: `${error.message}\n`, exitCode: 2 };
+        }
+        if (error instanceof InvalidTransactionError) {
+          return { stdout: `${error.message}\n`, exitCode: 1 };
+        }
+        const message = error instanceof Error ? error.message : String(error);
+        return { stdout: `${message}\n`, exitCode: 1 };
+      }
+    }
+    return {
+      stdout: "Usage: solanaguard rules --base64 <TX> | --signature <SIGNATURE>\n",
+      exitCode: 1,
+    };
+  }
+
   const help = `${SOLANAGUARD_NAME} ${SOLANAGUARD_VERSION}
 
-Phase 6: normalize, decode, resolve accounts, and classify on/off-curve keys.
-Off-curve is not evidence of malice. Seeds are not recovered.
+Phase 7: normalize, decode, resolve, classify curve, and evaluate deterministic rules.
+Findings may require review. They are not a score or a safety verdict.
 
 Implemented:
   solanaguard --version
@@ -114,6 +158,8 @@ Implemented:
   solanaguard account <ADDRESS>
   solanaguard normalize --base64 <TX>
   solanaguard normalize --signature <SIGNATURE>
+  solanaguard rules --base64 <TX>
+  solanaguard rules --signature <SIGNATURE>
 
 Not implemented yet:
   analyze / simulate / program

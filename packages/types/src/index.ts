@@ -1,8 +1,13 @@
 /**
  * Shared types for SolanaGuard.
- * Risk/report types are added when the risk engine exists.
+ * Rule findings exist (Phase 7). A numeric risk score does not.
  */
 
+export type {
+  RuleEvaluation,
+  RuleFinding,
+  RuleSeverity,
+} from "./rules.js";
 export type {
   AccountPresence,
   AccountResolutionSummary,
