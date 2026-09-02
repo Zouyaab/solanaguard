@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { SOLANAGUARD_NAME, SOLANAGUARD_VERSION } from "@solanaguard/types";
-import { SolanaRpc, type SolanaRpcAdapter } from "@solanaguard/solana";
+import { SolanaRpc, stubNormalizedSimulation, type SolanaRpcAdapter } from "@solanaguard/solana";
 import { buildApp } from "./app.js";
 
 function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
@@ -16,13 +16,7 @@ function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
     getTransaction: vi.fn(async () => null),
     getTransactionWire: vi.fn(async () => null),
     getBalance: vi.fn(async () => 0n),
-    simulateTransactionBytes: vi.fn(async () => ({
-      available: true as const,
-      success: false,
-      error: null,
-      logs: [],
-      unitsConsumed: null,
-    })),
+    simulateTransactionBytes: vi.fn(async () => stubNormalizedSimulation()),
     ...overrides,
   };
   return new SolanaRpc(adapter, "https://api.devnet.solana.com");
@@ -40,14 +34,14 @@ describe("API Phase 7", { timeout: 60_000 }, () => {
     await app.close();
   });
 
-  it("GET /api/v1/version is honest about missing analysis", async () => {
+  it("GET /api/v1/version reports Phase 10 comparison without calling it a safety verdict", async () => {
     const app = buildApp();
     const response = await app.inject({ method: "GET", url: "/api/v1/version" });
     expect(response.statusCode).toBe(200);
     const body = response.json() as { phase: number; note: string };
-    expect(body.phase).toBe(7);
-    expect(body.note).toMatch(/not a risk score/i);
-    expect(body.note).toMatch(/scoring is not implemented/i);
+    expect(body.phase).toBe(10);
+    expect(body.note).toMatch(/not a safety verdict/i);
+    expect(body.note).toMatch(/compar/i);
     await app.close();
   });
 
@@ -137,6 +131,98 @@ describe("API Phase 7", { timeout: 60_000 }, () => {
     expect(body.evaluation.note).toMatch(/not a risk score/i);
     expect(body.evaluation).not.toHaveProperty("score");
     expect(JSON.stringify(body.evaluation)).not.toMatch(/malicious/i);
+    await app.close();
+  });
+
+  it("POST /api/v1/transactions/score returns a transparent breakdown", async () => {
+    const app = buildApp({ rpc: mockRpc() });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/transactions/score",
+      payload: {
+        base64:
+          "Aecq9mMF4htQuahqnrKRXHzGPmtuxSNj3PCHqwV+aESk4I3P/1AGM7tneIzgF4eNbTZwmDDTGz4rED2UfyWGtgKAAQABAwafd7Wj1Am+2iNI3JDf0BDwxjcevjSU6u+w7PElwShXB8c/1UTJwIVBcsnyguiJJXGSUgVkHRojpkD+x44QnbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQICAAEMAgAAAAEAAAAAAAAAAA==",
+      },
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as {
+      evaluation: { findings: unknown[]; note: string };
+      score: {
+        total: number;
+        band: string;
+        contributions: unknown[];
+        note: string;
+        weights: Record<string, number>;
+      };
+    };
+    expect(body.score.total).toBeGreaterThanOrEqual(0);
+    expect(body.score.band).toMatch(/no_findings|informational|elevated|requires_review/);
+    expect(body.score.note).toMatch(/not a proof of safety/i);
+    expect(body.score.weights).toMatchObject({
+      info: 5,
+      unusual: 20,
+      needs_review: 35,
+    });
+    expect(JSON.stringify(body)).not.toMatch(/malicious/i);
+    expect(body.evaluation).toBeDefined();
+    await app.close();
+  });
+
+  it("POST /api/v1/transactions/simulate returns a preview, not a verdict", async () => {
+    const app = buildApp({ rpc: mockRpc() });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/transactions/simulate",
+      payload: {
+        base64:
+          "Aecq9mMF4htQuahqnrKRXHzGPmtuxSNj3PCHqwV+aESk4I3P/1AGM7tneIzgF4eNbTZwmDDTGz4rED2UfyWGtgKAAQABAwafd7Wj1Am+2iNI3JDf0BDwxjcevjSU6u+w7PElwShXB8c/1UTJwIVBcsnyguiJJXGSUgVkHRojpkD+x44QnbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQICAAEMAgAAAAEAAAAAAAAAAA==",
+      },
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as {
+      transaction: { source: string };
+      simulation: { note: string; success: boolean; sigVerify: boolean; replaceRecentBlockhash: boolean };
+    };
+    expect(body.transaction.source).toBe("base64");
+    expect(body.simulation.sigVerify).toBe(false);
+    expect(body.simulation.replaceRecentBlockhash).toBe(true);
+    expect(body.simulation.note).toMatch(/not a safety verdict/i);
+    expect(JSON.stringify(body.simulation)).not.toMatch(/malicious/i);
+    await app.close();
+  });
+
+  it("POST /api/v1/transactions/compare returns observations, not a verdict", async () => {
+    const app = buildApp({ rpc: mockRpc() });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/transactions/compare",
+      payload: {
+        base64:
+          "Aecq9mMF4htQuahqnrKRXHzGPmtuxSNj3PCHqwV+aESk4I3P/1AGM7tneIzgF4eNbTZwmDDTGz4rED2UfyWGtgKAAQABAwafd7Wj1Am+2iNI3JDf0BDwxjcevjSU6u+w7PElwShXB8c/1UTJwIVBcsnyguiJJXGSUgVkHRojpkD+x44QnbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQICAAEMAgAAAAEAAAAAAAAAAA==",
+      },
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as {
+      transaction: { source: string };
+      simulation: { note: string };
+      comparison: {
+        note: string;
+        expectedEffects: unknown[];
+        observations: { status: string }[];
+        summary: { matched: number; diverged: number; incomplete: number; notApplicable: number };
+      };
+    };
+    expect(body.transaction.source).toBe("base64");
+    expect(body.comparison.expectedEffects.length).toBeGreaterThan(0);
+    expect(body.comparison.observations.length).toBeGreaterThan(0);
+    expect(body.comparison.note).toMatch(/not a safety verdict/i);
+    expect(JSON.stringify(body.comparison)).not.toMatch(/malicious/i);
+    expect(body.comparison.summary).toMatchObject({
+      matched: expect.any(Number),
+      diverged: expect.any(Number),
+      incomplete: expect.any(Number),
+      notApplicable: expect.any(Number),
+    });
     await app.close();
   });
 

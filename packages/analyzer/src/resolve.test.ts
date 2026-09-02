@@ -7,7 +7,7 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { SolanaRpc, type NormalizedAccount, type SolanaRpcAdapter } from "@solanaguard/solana";
+import { SolanaRpc, stubNormalizedSimulation, type NormalizedAccount, type SolanaRpcAdapter } from "@solanaguard/solana";
 import {
   LOOKUPS_UNRESOLVED_NOTE,
   normalizeLocalTransaction,
@@ -51,13 +51,7 @@ function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
     getTransaction: vi.fn(async () => null),
     getTransactionWire: vi.fn(async () => null),
     getBalance: vi.fn(async () => 0n),
-    simulateTransactionBytes: vi.fn(async () => ({
-      available: true as const,
-      success: false,
-      error: null,
-      logs: [],
-      unitsConsumed: null,
-    })),
+    simulateTransactionBytes: vi.fn(async () => stubNormalizedSimulation()),
     ...overrides,
   };
   return new SolanaRpc(adapter, "https://api.devnet.solana.com");

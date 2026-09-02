@@ -36,6 +36,24 @@ export interface TransactionWire {
   } | null;
 }
 
+export interface SimulatedAccountSnapshot {
+  address: string;
+  returned: boolean;
+  lamports: number | null;
+  owner: string | null;
+  executable: boolean | null;
+  dataLength: number;
+  dataBase64: string | null;
+}
+
+export interface SimulatedInnerCompiled {
+  instructionIndex: number;
+  programIdIndex: number;
+  programId: string | null;
+  accountIndexes: number[];
+  dataBase64: string;
+}
+
 export interface NormalizedSimulation {
   /**
    * True when the RPC returned a simulation result.
@@ -46,6 +64,19 @@ export interface NormalizedSimulation {
   error: unknown;
   logs: string[];
   unitsConsumed: number | null;
+  contextSlot: number | null;
+  replacementBlockhash: string | null;
+  returnData: { programId: string; dataBase64: string } | null;
+  innerInstructions: SimulatedInnerCompiled[];
+  accounts: SimulatedAccountSnapshot[];
+  accountsRequested: string[];
+  accountsReturned: boolean;
+  sigVerify: boolean;
+  replaceRecentBlockhash: boolean;
+}
+
+export interface SimulateTransactionOptions {
+  accounts?: readonly string[];
 }
 
 export interface RpcStatus {
@@ -66,7 +97,32 @@ export interface SolanaRpcAdapter {
   getTransaction(signature: string): Promise<NormalizedTransactionLookup | null>;
   getTransactionWire(signature: string): Promise<TransactionWire | null>;
   getBalance(address: string): Promise<bigint>;
-  simulateTransactionBytes(bytes: Uint8Array): Promise<NormalizedSimulation>;
+  simulateTransactionBytes(
+    bytes: Uint8Array,
+    options?: SimulateTransactionOptions,
+  ): Promise<NormalizedSimulation>;
 }
 
 export const MAX_GET_MULTIPLE_ACCOUNTS = 100;
+
+export function stubNormalizedSimulation(
+  overrides: Partial<NormalizedSimulation> = {},
+): NormalizedSimulation {
+  return {
+    available: true,
+    success: false,
+    error: null,
+    logs: [],
+    unitsConsumed: null,
+    contextSlot: null,
+    replacementBlockhash: null,
+    returnData: null,
+    innerInstructions: [],
+    accounts: [],
+    accountsRequested: [],
+    accountsReturned: false,
+    sigVerify: false,
+    replaceRecentBlockhash: true,
+    ...overrides,
+  };
+}

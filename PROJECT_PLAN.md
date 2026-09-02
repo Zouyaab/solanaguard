@@ -2,7 +2,7 @@
 
 This is the working delivery plan. Each phase is only "done" when install/build/lint/tests for that phase pass, and no unimplemented capability is described as working.
 
-## Current phase: 7 (risk rules framework)
+## Current phase: 10 (expected vs simulated behavior)
 
 **Do not start later phases until the operator says `continue`.**
 
@@ -57,9 +57,9 @@ AI: **out of MVP**. Optional explanation later; cannot override rules.
 | 5     | Account resolution                                          | **done (verified locally)** |
 | 6     | PDA / off-curve classification (no false malice)            | **done (verified locally)** |
 | 7     | Risk rules framework                                        | **done (verified locally)** |
-| 8     | Transparent scoring                                         | pending                     |
-| 9     | Simulation normalization                                    | pending                     |
-| 10    | Expected vs simulated behavior                              | pending                     |
+| 8     | Transparent scoring                                         | **done (verified locally)** |
+| 9     | Simulation normalization                                    | **done (verified locally)** |
+| 10    | Expected vs simulated behavior                              | **done (verified locally)** |
 | 11    | REST API analyze/simulate + OpenAPI                         | pending                     |
 | 12    | `@solanaguard/sdk`                                          | pending                     |
 | 13    | Full CLI commands                                           | pending                     |
@@ -123,6 +123,34 @@ AI: **out of MVP**. Optional explanation later; cannot override rules.
 - There is no numeric score
 - `POST /api/v1/transactions/evaluate-rules` and `solanaguard rules` work
 - Docs do not treat an empty findings list as "safe"
+
+## Phase 8 definition of done
+
+- Scoring is a pure function over `RuleEvaluation` findings (no RPC inside scoring)
+- Default severity weights and cap are exported and documented
+- Each finding contributes an explicit `points` + `reason` line in the breakdown
+- Total 0 / band `no_findings` means no built-in rule fired, not that the transaction is safe
+- `POST /api/v1/transactions/score` and `solanaguard score` return evaluation + score
+- `evaluate-rules` remains findings-only (no score field) for Phase 7 callers
+- Docs do not treat the score as a proof of safety or of attack
+
+## Phase 9 definition of done
+
+- RPC `simulateTransaction` results are mapped to a structured `SimulationReport`
+- Simulation uses `replaceRecentBlockhash: true` and `sigVerify: false`
+- Post-state accounts and inner instructions are included when the RPC returns them
+- `POST /api/v1/transactions/simulate` and `solanaguard simulate` work
+- Docs state that simulation is a cluster preview, not a safety verdict
+- Expected-vs-simulated comparison is not claimed (Phase 10)
+
+## Phase 10 definition of done
+
+- Expected effects are derived from decoded instructions (pure)
+- Comparison against a `SimulationReport` emits `matched` / `diverged` / `incomplete` / `not_applicable` observations
+- Fee-payer lamport checks allow an extra fee debit without asserting the exact fee
+- Undecoded instructions and unparsed token balances are incomplete, not malice
+- `POST /api/v1/transactions/compare` and `solanaguard compare` work
+- Docs state that comparison observations are not a safety verdict
 
 ## Language rules (permanent)
 

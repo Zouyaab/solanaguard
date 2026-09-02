@@ -22,5 +22,15 @@ export {
   LOOKUPS_UNRESOLVED_NOTE,
   normalizeLocalTransaction,
   normalizeTransaction,
+  transactionBytesFromInput,
 } from "./normalize.js";
 export type { LocalTransactionInput, NormalizeOptions, TransactionInput } from "./normalize.js";
+export { SIMULATION_NOTE, simulateNormalizedTransaction } from "./simulate.js";
+export type { SimulateOptions, SimulatedTransactionView } from "./simulate.js";
+export {
+  BEHAVIOR_COMPARISON_NOTE,
+  compareExpectedToSimulated,
+  compareNormalizedTransaction,
+  deriveExpectedEffects,
+} from "./compare.js";
+export type { ComparedTransactionView } from "./compare.js";

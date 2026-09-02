@@ -6,6 +6,7 @@ import {
   type LatestBlockhash,
   type NormalizedAccount,
   type NormalizedSimulation,
+  type SimulateTransactionOptions,
   type NormalizedTransactionLookup,
   type RpcStatus,
   type SolanaRpcAdapter,
@@ -80,12 +81,13 @@ export class SolanaRpc {
 
   async simulateTransaction(
     input: VersionedTransaction | Uint8Array,
+    options: SimulateTransactionOptions = {},
   ): Promise<NormalizedSimulation> {
     const bytes = input instanceof Uint8Array ? input : input.serialize();
     if (bytes.length === 0) {
       throw new InvalidTransactionError("Transaction bytes are empty.");
     }
-    return this.adapter.simulateTransactionBytes(bytes);
+    return this.adapter.simulateTransactionBytes(bytes, options);
   }
 
   async getStatus(): Promise<RpcStatus> {

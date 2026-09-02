@@ -10,7 +10,7 @@ This package talks to a real cluster (Devnet by default). It does **not** analyz
 - `getAccount` / `getMultipleAccounts` / `getBalance`
 - `getTransaction` (returns `null` if the signature is not on the cluster)
 - `getTransactionWire` (serialized bytes plus confirmation metadata; `null` if missing)
-- `simulateTransaction` for a `VersionedTransaction` or its bytes
+- `simulateTransaction` for a `VersionedTransaction` or its bytes, including inner instructions and requested post-state accounts when the RPC returns them
 - Strips API keys from endpoint labels used in logs and HTTP responses
 
 ## What it does not do

@@ -1,8 +1,8 @@
 # @solanaguard/analyzer
 
-Phases 3–6: transaction input → `NormalizedTransaction` with decoder plugins, optional account resolution, and Ed25519 on/off-curve labels.
+Phases 3–6 and 9: transaction input → `NormalizedTransaction`, then optional cluster simulation.
 
-Decoding, resolution, and curve class are **not** a risk assessment. This package does not simulate or score risk. It does not recover PDA seeds.
+Decoding, resolution, curve class, and simulation are **not** a risk assessment. This package does not score risk. It does not recover PDA seeds. A successful simulation is not a safety verdict.
 
 ## What it does
 
@@ -29,3 +29,4 @@ Unknown programs stay `decoded: false` with `decodeStatus: "unknown_program"`. M
 - It does not decide if a transaction is safe.
 - It does not recover PDA seeds or prove that a key is a PDA.
 - It does not run risk rules (that is `@solanaguard/risk-engine`).
+- `simulateNormalizedTransaction` is a cluster preview (`replaceRecentBlockhash`, no sig verify).

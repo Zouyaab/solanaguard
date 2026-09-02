@@ -7,7 +7,7 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { InvalidTransactionError, SolanaRpc, type SolanaRpcAdapter } from "@solanaguard/solana";
+import { InvalidTransactionError, SolanaRpc, stubNormalizedSimulation, type SolanaRpcAdapter } from "@solanaguard/solana";
 import { MAX_SOLANA_TRANSACTION_BYTES } from "@solanaguard/types";
 import { TransactionNotFoundError } from "./errors.js";
 import {
@@ -55,13 +55,7 @@ function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
     getTransaction: vi.fn(async () => null),
     getTransactionWire: vi.fn(async () => null),
     getBalance: vi.fn(async () => 0n),
-    simulateTransactionBytes: vi.fn(async () => ({
-      available: true as const,
-      success: false,
-      error: null,
-      logs: [],
-      unitsConsumed: null,
-    })),
+    simulateTransactionBytes: vi.fn(async () => stubNormalizedSimulation()),
     ...overrides,
   };
   return new SolanaRpc(adapter, "https://api.devnet.solana.com");

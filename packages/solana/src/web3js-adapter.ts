@@ -10,11 +10,12 @@ import { decodeBase58 } from "./encoding.js";
 import type {
   LatestBlockhash,
   NormalizedAccount,
-  NormalizedSimulation,
   NormalizedTransactionLookup,
+  SimulateTransactionOptions,
   SolanaRpcAdapter,
   TransactionWire,
 } from "./types.js";
+import { normalizeSimulateRpcResult } from "./simulate.js";
 
 const COMMITMENT = "confirmed" as const;
 const DEFAULT_TIMEOUT_MS = 20_000;
@@ -190,8 +191,8 @@ export function createWeb3JsAdapter(connection: Connection): SolanaRpcAdapter {
       });
     },
 
-    async simulateTransactionBytes(bytes: Uint8Array) {
-      return wrap("simulateTransaction", async (): Promise<NormalizedSimulation> => {
+    async simulateTransactionBytes(bytes: Uint8Array, options?: SimulateTransactionOptions) {
+      return wrap("simulateTransaction", async () => {
         let transaction: VersionedTransaction;
         try {
           transaction = VersionedTransaction.deserialize(bytes);
@@ -201,18 +202,28 @@ export function createWeb3JsAdapter(connection: Connection): SolanaRpcAdapter {
             cause,
           );
         }
-        const result = await connection.simulateTransaction(transaction, {
+        const accounts = [...(options?.accounts ?? [])];
+        const config: Record<string, unknown> = {
           commitment: COMMITMENT,
           replaceRecentBlockhash: true,
           sigVerify: false,
-        });
-        return {
-          available: true,
-          success: result.value.err === null,
-          error: result.value.err,
-          logs: result.value.logs ?? [],
-          unitsConsumed: result.value.unitsConsumed ?? null,
+          innerInstructions: true,
         };
+        if (accounts.length > 0) {
+          config.accounts = { encoding: "base64", addresses: accounts };
+        }
+        const result = await connection.simulateTransaction(
+          transaction,
+          config as Parameters<Connection["simulateTransaction"]>[1],
+        );
+        const context = result as { context?: { slot?: number }; value: unknown };
+        return normalizeSimulateRpcResult({
+          contextSlot: typeof context.context?.slot === "number" ? context.context.slot : null,
+          value: context.value,
+          options: accounts.length ? { accounts } : {},
+          sigVerify: false,
+          replaceRecentBlockhash: true,
+        });
       });
     },
   };

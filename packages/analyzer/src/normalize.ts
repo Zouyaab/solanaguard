@@ -190,6 +190,31 @@ function decodeBase64(value: string): Uint8Array {
   return Uint8Array.from(bytes);
 }
 
+function versionedFromLocal(input: LocalTransactionInput): VersionedTransaction {
+  if (input instanceof Uint8Array) {
+    return deserializeBytes(input);
+  }
+  if (input.source === "bytes") {
+    return deserializeBytes(input.bytes);
+  }
+  if (input.source === "base64") {
+    return deserializeBytes(decodeBase64(input.base64));
+  }
+  if (input.source === "versioned") {
+    return input.transaction;
+  }
+  const serialized = input.transaction.serialize({
+    requireAllSignatures: false,
+    verifySignatures: false,
+  });
+  return deserializeBytes(Uint8Array.from(serialized));
+}
+
+/** Wire bytes for a local input. Used by simulation without a second deserialize path. */
+export function transactionBytesFromInput(input: LocalTransactionInput): Uint8Array {
+  return serializeVersioned(versionedFromLocal(input));
+}
+
 function fromVersioned(
   transaction: VersionedTransaction,
   source: TransactionInputSource,
@@ -242,26 +267,18 @@ export function normalizeLocalTransaction(
 ): NormalizedTransaction {
   const extras = options?.plugins ? { plugins: options.plugins } : undefined;
   if (input instanceof Uint8Array) {
-    const transaction = deserializeBytes(input);
-    return fromVersioned(transaction, "bytes", extras);
+    return fromVersioned(versionedFromLocal(input), "bytes", extras);
   }
   if (input.source === "bytes") {
-    const transaction = deserializeBytes(input.bytes);
-    return fromVersioned(transaction, "bytes", extras);
+    return fromVersioned(versionedFromLocal(input), "bytes", extras);
   }
   if (input.source === "base64") {
-    const transaction = deserializeBytes(decodeBase64(input.base64));
-    return fromVersioned(transaction, "base64", extras);
+    return fromVersioned(versionedFromLocal(input), "base64", extras);
   }
   if (input.source === "versioned") {
     return fromVersioned(input.transaction, "versioned", extras);
   }
-  const serialized = input.transaction.serialize({
-    requireAllSignatures: false,
-    verifySignatures: false,
-  });
-  const transaction = deserializeBytes(Uint8Array.from(serialized));
-  return fromVersioned(transaction, "legacy", extras);
+  return fromVersioned(versionedFromLocal(input), "legacy", extras);
 }
 
 async function normalizeVersioned(

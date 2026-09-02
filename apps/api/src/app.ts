@@ -1,10 +1,12 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import {
   classifyAddress,
+  compareNormalizedTransaction,
   normalizeTransaction,
+  simulateNormalizedTransaction,
   TransactionNotFoundError,
 } from "@solanaguard/analyzer";
-import { evaluateRules } from "@solanaguard/risk-engine";
+import { evaluateAndScore, evaluateRules } from "@solanaguard/risk-engine";
 import {
   SOLANAGUARD_NAME,
   SOLANAGUARD_VERSION,
@@ -74,8 +76,8 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     return {
       name: SOLANAGUARD_NAME,
       version: SOLANAGUARD_VERSION,
-      phase: 7,
-      note: "Phase 7 evaluates deterministic rules over a normalized transaction. Findings may require review. They are not a risk score, not a safety verdict, and not evidence of malice. Transparent scoring is not implemented yet.",
+      phase: 10,
+      note: "Phase 10 compares decoded instruction effects to a cluster simulation preview. Observations are not a safety verdict.",
     };
   });
 
@@ -197,6 +199,71 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
       return;
     }
     return { transaction, evaluation: evaluateRules(transaction) };
+  });
+
+  app.post("/api/v1/transactions/score", async (request, reply) => {
+    const transaction = await normalizeFromBody(request.body, reply);
+    if (!transaction) {
+      return;
+    }
+    const { evaluation, score } = evaluateAndScore(transaction);
+    return { transaction, evaluation, score };
+  });
+
+  async function simulateOrCompareFromBody(
+    body: unknown,
+    reply: FastifyReply,
+    mode: "simulate" | "compare",
+  ) {
+    if (!rpc) {
+      return reply.code(503).send({
+        error: "rpc_not_configured",
+        message: "This process was started without a Solana RPC client.",
+      });
+    }
+    if (body === null || typeof body !== "object" || Array.isArray(body)) {
+      return reply.code(400).send({
+        error: "invalid_request",
+        message: "JSON body must be an object with base64 or signature.",
+      });
+    }
+    const record = body as Record<string, unknown>;
+    const base64 = record.base64;
+    const signature = record.signature;
+    if (typeof base64 === "string" && typeof signature === "string") {
+      return reply.code(400).send({
+        error: "invalid_request",
+        message: "Provide either base64 or signature, not both.",
+      });
+    }
+    try {
+      const input =
+        typeof base64 === "string"
+          ? ({ source: "base64", base64 } as const)
+          : typeof signature === "string"
+            ? ({ source: "signature", signature } as const)
+            : null;
+      if (!input) {
+        return reply.code(400).send({
+          error: "invalid_request",
+          message: "JSON body must include string field base64 or signature.",
+        });
+      }
+      if (mode === "compare") {
+        return await compareNormalizedTransaction(input, { rpc });
+      }
+      return await simulateNormalizedTransaction(input, { rpc });
+    } catch (error) {
+      return sendRpcError(reply, error);
+    }
+  }
+
+  app.post("/api/v1/transactions/simulate", async (request, reply) => {
+    return simulateOrCompareFromBody(request.body, reply, "simulate");
+  });
+
+  app.post("/api/v1/transactions/compare", async (request, reply) => {
+    return simulateOrCompareFromBody(request.body, reply, "compare");
   });
 
   return app;

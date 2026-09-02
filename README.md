@@ -2,7 +2,7 @@
 
 Open-source transaction safety and risk analysis infrastructure for Solana.
 
-> **Phase 7 status:** Deterministic rules can emit findings (`info`, `unusual`, `needs_review`). Findings **require review**. They are **not** a risk score and **not** a safety verdict. Scoring, simulation comparison, SDK, and dashboard are **not implemented yet**. Do not treat this repository as a security product.
+> **Phase 10 status:** Transactions can be normalized, decoded, rule-scored, simulated, and **compared** (decoded expectations vs simulation preview). Comparison observations are **not** a safety verdict. SDK and dashboard are **not implemented yet**. Do not treat this repository as a security product.
 
 ## What is this?
 
@@ -42,8 +42,10 @@ The currently open workspace (`clearscript-imr`) is a Python Streamlit medical-f
 | Account resolution (RPC snapshots + ALT load)        | Implemented (Phase 5)             |
 | On/off-curve key classification                      | Implemented (Phase 6)             |
 | Deterministic rule findings                          | Implemented (Phase 7)             |
-| Transparent risk score                               | **Not implemented** (Phase 8)     |
-| Transaction risk analysis                            | **Not implemented** (Phases 8–10) |
+| Transparent risk score                               | Implemented (Phase 8)             |
+| Simulation normalization                             | Implemented (Phase 9)             |
+| Expected vs simulated comparison                     | Implemented (Phase 10)            |
+| Transaction risk analysis                            | Partial (rules + score + compare) |
 | REST analyze endpoints                               | **Not implemented** (Phase 11)    |
 | SDK                                                  | **Not implemented** (Phase 12)    |
 | Full CLI analyze commands                            | **Not implemented** (Phase 13)    |
@@ -80,6 +82,12 @@ POST http://127.0.0.1:3001/api/v1/transactions/normalize
   {"base64":"<wire transaction>"}
 POST http://127.0.0.1:3001/api/v1/transactions/evaluate-rules
   {"base64":"<wire transaction>"}
+POST http://127.0.0.1:3001/api/v1/transactions/score
+  {"base64":"<wire transaction>"}
+POST http://127.0.0.1:3001/api/v1/transactions/simulate
+  {"base64":"<wire transaction>"}
+POST http://127.0.0.1:3001/api/v1/transactions/compare
+  {"base64":"<wire transaction>"}
 ```
 
 CLI (after `pnpm build`):
@@ -90,6 +98,9 @@ pnpm cli -- rpc-status
 pnpm cli -- account 11111111111111111111111111111111
 pnpm cli -- normalize --base64 <TX>
 pnpm cli -- rules --base64 <TX>
+pnpm cli -- score --base64 <TX>
+pnpm cli -- simulate --base64 <TX>
+pnpm cli -- compare --base64 <TX>
 ```
 
 Live Devnet unit-test extras:
@@ -107,8 +118,8 @@ cli               Command-line entry (help/version in Phase 1)
 packages/types    Shared version and type constants
 packages/config   Environment parsing
 packages/solana   RPC wrapper (Phase 2)
-packages/analyzer Transaction normalize, decode, resolve, curve class (Phases 3–6)
-packages/risk-engine Deterministic rules (Phase 7; score in Phase 8)
+packages/analyzer    Transaction normalize, decode, resolve, curve class, simulate, compare (Phases 3–6, 9–10)
+packages/risk-engine Deterministic rules + transparent score (Phases 7–8)
 packages/sdk      Planned TypeScript client (Phase 12)
 apps/web          Planned Next.js dashboard (Phase 14)
 docs              Architecture and plan

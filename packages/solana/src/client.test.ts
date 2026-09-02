@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { SolanaRpc, GET_MULTIPLE_ACCOUNTS_LIMIT } from "./client.js";
 import { InvalidAddressError, InvalidTransactionError } from "./errors.js";
 import type { NormalizedAccount, SolanaRpcAdapter } from "./types.js";
+import { stubNormalizedSimulation } from "./types.js";
 
 function account(address: string): NormalizedAccount {
   return {
@@ -28,13 +29,7 @@ function mockAdapter(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpcAdapte
     getTransaction: vi.fn(async () => null),
     getTransactionWire: vi.fn(async () => null),
     getBalance: vi.fn(async () => 0n),
-    simulateTransactionBytes: vi.fn(async () => ({
-      available: true as const,
-      success: false,
-      error: { InsufficientFundsForFee: {} },
-      logs: [],
-      unitsConsumed: null,
-    })),
+    simulateTransactionBytes: vi.fn(async () => stubNormalizedSimulation()),
     ...overrides,
   };
 }
@@ -94,5 +89,16 @@ describe("SolanaRpc", () => {
     await expect(rpc.simulateTransaction(new Uint8Array())).rejects.toBeInstanceOf(
       InvalidTransactionError,
     );
+  });
+
+  it("forwards optional account keys to the adapter", async () => {
+    const adapter = mockAdapter();
+    const rpc = new SolanaRpc(adapter, "https://api.devnet.solana.com");
+    await rpc.simulateTransaction(new Uint8Array([1, 2, 3]), {
+      accounts: ["11111111111111111111111111111111"],
+    });
+    expect(adapter.simulateTransactionBytes).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]), {
+      accounts: ["11111111111111111111111111111111"],
+    });
   });
 });

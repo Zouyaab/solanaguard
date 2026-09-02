@@ -25,4 +25,30 @@ describe("CLI", () => {
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toMatch(/Usage: solanaguard rules/i);
   });
+
+  it("requires flags for score", async () => {
+    const result = await runCli(["score"]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toMatch(/Usage: solanaguard score/i);
+  });
+
+  it("requires flags for simulate", async () => {
+    const result = await runCli(["simulate"]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toMatch(/Usage: solanaguard simulate/i);
+  });
+
+  it("requires flags for compare", async () => {
+    const result = await runCli(["compare"]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toMatch(/Usage: solanaguard compare/i);
+  });
+
+  it("lists compare in help and still withholds analyze", async () => {
+    const result = await runCli([]);
+    expect(result.stdout).toMatch(/solanaguard compare/i);
+    expect(result.stdout).toMatch(/not a safety verdict/i);
+    expect(result.stdout).toMatch(/not implemented yet/i);
+    expect(result.stdout).toMatch(/analyze/i);
+  });
 });

@@ -20,7 +20,13 @@ Phase 3 accepts bytes, base64, web3.js objects, or a confirmed signature. Phase 
 
 ## Decision: @solanaguard/risk-engine owns deterministic rules
 
-Phase 7 evaluates pure rules over a `NormalizedTransaction`. Findings are observations that may require review. There is no score yet. Empty findings does not mean the transaction is safe.
+Phase 7 evaluates pure rules over a `NormalizedTransaction`. Findings are observations that may require review. Empty findings does not mean the transaction is safe.
+
+Phase 8 scores those findings with published severity weights and a capped total. The breakdown lists every contribution. A score of 0 means no built-in rule fired — not that the transaction is safe.
+
+Phase 9 maps `simulateTransaction` into a structured `SimulationReport` (logs, units, inner instructions, requested post-state accounts). Simulation uses `replaceRecentBlockhash` and does not verify signatures. It is a cluster preview, not a safety verdict.
+
+Phase 10 derives expected effects from decoded instructions and compares them to the simulation preview (`matched` / `diverged` / `incomplete` / `not_applicable`). A clean comparison is not a proof of safety.
 
 ## Decision: no database in Phase 1
 
@@ -36,7 +42,7 @@ Analysis is an off-chain developer tool. A program does not make parsing safer. 
 
 ## Decision: deterministic core
 
-`packages/risk-engine` is pure functions over a normalized transaction. Network I/O lives in `packages/solana`. The API only orchestrates. Phase 7 emits findings. Phase 8 will add a transparent score on top of the same findings.
+`packages/risk-engine` is pure functions over a normalized transaction. Network I/O lives in `packages/solana`. The API only orchestrates. Phase 7 emits findings. Phase 8 adds a transparent score on top of the same findings.
 
 ## Package responsibilities (target)
 
@@ -45,8 +51,8 @@ Analysis is an off-chain developer tool. A program does not make parsing safer. 
 | `@solanaguard/types`       | Shared constants and public types                       |
 | `@solanaguard/config`      | Env parsing                                             |
 | `@solanaguard/solana`      | RPC wrapper (Phase 2)                                   |
-| `@solanaguard/analyzer`    | Normalize (3), decode (4), resolve (5), curve class (6) |
-| `@solanaguard/risk-engine` | Rules (Phase 7); score later (Phase 8)                  |
+| `@solanaguard/analyzer`    | Normalize (3), decode (4), resolve (5), curve class (6), simulate (9), compare (10) |
+| `@solanaguard/risk-engine` | Rules (Phase 7) + transparent score (Phase 8)           |
 | `@solanaguard/sdk`         | HTTP client for apps/api (Phase 12)                     |
 | `@solanaguard/api`         | HTTP surface                                            |
 | `@solanaguard/cli`         | Developer CLI                                           |

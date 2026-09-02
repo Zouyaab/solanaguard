@@ -1,12 +1,17 @@
 /**
  * Shared types for SolanaGuard.
- * Rule findings exist (Phase 7). A numeric risk score does not.
+ * Rule findings (Phase 7), transparent scores (Phase 8), simulation reports
+ * (Phase 9), and expected-vs-simulated observations (Phase 10) exist.
+ * None of these is a safety verdict.
  */
 
 export type {
+  RiskScore,
+  RiskScoreBand,
   RuleEvaluation,
   RuleFinding,
   RuleSeverity,
+  ScoreContribution,
 } from "./rules.js";
 export type {
   AccountPresence,
@@ -25,6 +30,20 @@ export type {
   TransactionInputSource,
   TransactionVersion,
 } from "./transaction.js";
+export type {
+  SimulatedAccountView,
+  SimulatedInnerInstruction,
+  SimulatedReturnData,
+  SimulationReport,
+} from "./simulation.js";
+export type {
+  BehaviorComparison,
+  BehaviorComparisonSummary,
+  ComparisonObservation,
+  ComparisonStatus,
+  ExpectedEffect,
+  ExpectedEffectKind,
+} from "./comparison.js";
 export { MAX_SOLANA_TRANSACTION_BYTES } from "./transaction.js";
 
 export const SOLANAGUARD_VERSION = "0.1.0";
