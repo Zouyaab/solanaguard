@@ -63,6 +63,65 @@ This document exists so SolanaGuard does not over-claim.
 - Token amounts are not fully verified until token account balances are parsed.
 - Fee-payer lamport checks allow an extra fee debit without asserting the exact fee.
 
+## Phase 11
+
+- `POST /api/v1/analyze/transaction` composes normalize + rules + score + optional simulation/comparison.
+- A low score, matched comparison, or successful simulation is still not a safety verdict.
+- `GET /api/v1/program/:programId` reports whether an account is executable. Non-executable is incomplete coverage, not malice.
+- OpenAPI documents the HTTP surface; it does not add trust.
+
+## Phase 12
+
+- `@solanaguard/sdk` is an HTTP client. It forwards API results; it does not re-score locally.
+- Convenience helpers still require an explicit `baseUrl`. There is no hidden production endpoint.
+- SDK errors are transport/API failures, not risk findings.
+
+## Phase 13
+
+- `solanaguard analyze` prints score band, findings, simulation, and comparison with disclaimers.
+- Empty findings still print “(none — empty findings are not a pass)”.
+- `program` / `transaction` lookups are cluster reads, not risk verdicts.
+
+## Phase 14
+
+- The dashboard renders API reports; it does not invent findings.
+- A polished UI does not change the meaning of scores or simulations.
+- Looking up an account/program/transaction is not an analysis verdict.
+
+## Phase 15
+
+- The wallet demo is Devnet-only and labeled as a development/test environment.
+- Analysis before sign does not mean the transaction is safe.
+- Explicit review is required before sign/send; nothing is auto-signed.
+
+## Phase 16
+
+- Rate limits and timeouts reduce abuse and hung RPCs; they do not validate transaction safety.
+- Rejecting private-key fields does not imply every other payload is benign.
+- A 200 analysis response is still not a pass.
+
+## Phase 17
+
+- Offline fixtures use locally built transactions and stub RPC; they do not prove cluster behavior.
+- Live Devnet tests are opt-in (`SOLANAGUARD_DEVNET_IT=1` / `pnpm test:devnet`) and can flake with public RPC.
+- Passing fixture or Devnet tests is not a safety verdict.
+
+## Phase 18
+
+- Benchmark numbers in docs must come from a real `pnpm bench` run with environment metadata.
+- Faster analyze is not safer analyze.
+- Public RPC latency is intentionally excluded from default benches.
+
+## Phase 19
+
+- Community policy files describe contribution and disclosure norms.
+- They do not add product capabilities and do not turn reports into safety verdicts.
+
+## Phase 20
+
+- Documentation completeness means coverage and honesty, not a claim that the product is finished forever.
+- Linked docs must match shipped behavior; stale “not implemented” claims are defects.
+
 ## Permanent technical limits (later phases must still respect these)
 
 - We cannot recover arbitrary PDA seeds from an address.

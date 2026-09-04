@@ -9,11 +9,14 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/swagger": "^9.8.1",
+    "@fastify/swagger-ui": "^6.1.1",
+    "@solanaguard/analyzer": "workspace:*",
     "@solanaguard/config": "workspace:*",
+    "@solanaguard/risk-engine": "workspace:*",
     "@solanaguard/solana": "workspace:*",
     "@solanaguard/types": "workspace:*",
-    "@solanaguard/analyzer": "workspace:*",
-    "@solanaguard/risk-engine": "workspace:*",
     "fastify": "^5.2.1"
   },
   "devDependencies": {

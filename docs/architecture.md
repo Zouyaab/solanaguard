@@ -28,6 +28,26 @@ Phase 9 maps `simulateTransaction` into a structured `SimulationReport` (logs, u
 
 Phase 10 derives expected effects from decoded instructions and compares them to the simulation preview (`matched` / `diverged` / `incomplete` / `not_applicable`). A clean comparison is not a proof of safety.
 
+Phase 11 exposes the composed analyze/simulate REST surface and OpenAPI documentation. The API orchestrates packages; it does not invent findings. Rate limiting is added in Phase 16.
+
+Phase 12 ships `@solanaguard/sdk` as a thin typed HTTP client. It depends on `@solanaguard/types` only, never signs, and never claims safety.
+
+Phase 13 completes the developer CLI (`analyze`, `program`, `transaction`, plus prior commands). Human-readable analyze output stays observational.
+
+Phase 14 adds the Next.js dashboard (`apps/web`) as an SDK client. The UI must keep the same honesty language as the API and CLI.
+
+Phase 15 ships `examples/wallet-demo`: connect on Devnet, analyze an unsigned draft, require explicit review before any sign/send. Mainnet is refused.
+
+Phase 16 hardens the API edge (body limits, timeouts, rate limiting, forbidden signing-material fields). Hardening is not a safety proof.
+
+Phase 17 adds fixture-based offline pipeline tests and opt-in live Devnet cases under `tests/`. Results remain observational.
+
+Phase 18 adds measured micro-benchmarks (`pnpm bench`). Reported timings must come from a real run; inventing latency numbers is forbidden. Speed is not a safety metric.
+
+Phase 19 adds root OSS community files (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`). Policy docs do not change analysis semantics.
+
+Phase 20 completes the documentation set (`docs/README.md` index, overview, configuration, rules, testing). Docs describe shipped behavior only.
+
 ## Decision: no database in Phase 1
 
 Nothing is persisted. `DATABASE_URL` is parsed so later phases can add SQLite without renaming env vars. An empty value means "unused".
@@ -51,21 +71,22 @@ Analysis is an off-chain developer tool. A program does not make parsing safer. 
 | `@solanaguard/types`       | Shared constants and public types                       |
 | `@solanaguard/config`      | Env parsing                                             |
 | `@solanaguard/solana`      | RPC wrapper (Phase 2)                                   |
-| `@solanaguard/analyzer`    | Normalize (3), decode (4), resolve (5), curve class (6), simulate (9), compare (10) |
+| `@solanaguard/analyzer`    | Normalize (3), decode (4), resolve (5), curve class (6), simulate (9), compare (10), analyze compose (11/13) |
 | `@solanaguard/risk-engine` | Rules (Phase 7) + transparent score (Phase 8)           |
 | `@solanaguard/sdk`         | HTTP client for apps/api (Phase 12)                     |
-| `@solanaguard/api`         | HTTP surface                                            |
-| `@solanaguard/cli`         | Developer CLI                                           |
-| `apps/web`                 | Dashboard (Phase 14)                                    |
+| `@solanaguard/api`         | HTTP surface + OpenAPI (Phase 11)                       |
+| `@solanaguard/cli`         | Developer CLI (Phase 13 full commands)                  |
+| `apps/web`                 | Next.js dashboard (Phase 14)                            |
 
-## Request path (future)
+## Request path (Phase 11 analyze / Phase 16 hardened)
 
-1. Validate and size-limit input
-2. Normalize transaction
-3. Decode known programs; mark others `decoded: false`
-4. Fetch account data (RPC)
-5. Simulate when a complete signed-or-fee-payer message allows it
-6. Evaluate rules
-7. Return report + score breakdown
+1. Validate and size-limit input (JSON schema + body limit + packet-sized base64)
+2. Reject forbidden signing-material fields
+3. Normalize transaction
+4. Decode known programs; mark others `decoded: false`
+5. Fetch account data (RPC when available; RPC calls use configured timeouts)
+6. Simulate when RPC is configured and `includeSimulation` is not false
+7. Evaluate rules and transparent score
+8. Return composed report (`TransactionAnalysisReport`)
 
-Simulation is **not** a security guarantee. It will be labeled as such in the API.
+Rate limiting applies per client IP (health/version/OpenAPI exempt). Simulation is **not** a security guarantee.

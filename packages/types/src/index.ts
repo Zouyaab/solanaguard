@@ -1,8 +1,8 @@
 /**
  * Shared types for SolanaGuard.
  * Rule findings (Phase 7), transparent scores (Phase 8), simulation reports
- * (Phase 9), and expected-vs-simulated observations (Phase 10) exist.
- * None of these is a safety verdict.
+ * (Phase 9), expected-vs-simulated observations (Phase 10), and the composed
+ * analysis report (Phase 11) exist. None of these is a safety verdict.
  */
 
 export type {
@@ -13,6 +13,7 @@ export type {
   RuleSeverity,
   ScoreContribution,
 } from "./rules.js";
+export type { TransactionAnalysisReport } from "./analysis.js";
 export type {
   AccountPresence,
   AccountResolutionSummary,

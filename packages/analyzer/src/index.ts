@@ -34,3 +34,5 @@ export {
   deriveExpectedEffects,
 } from "./compare.js";
 export type { ComparedTransactionView } from "./compare.js";
+export { TRANSACTION_ANALYSIS_NOTE, analyzeTransaction } from "./analyze.js";
+export type { AnalyzeOptions } from "./analyze.js";

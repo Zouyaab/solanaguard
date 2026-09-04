@@ -17,19 +17,25 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:devnet": "node ./scripts/run-devnet-tests.mjs",
+    "bench": "node ./scripts/run-benchmarks.mjs",
     "test:watch": "vitest",
     "dev": "pnpm --filter @solanaguard/api dev",
+    "dev:web": "pnpm --filter @solanaguard/web dev",
+    "dev:demo": "pnpm --filter @solanaguard/wallet-demo dev",
     "start": "pnpm --filter @solanaguard/api start",
     "cli": "pnpm --filter @solanaguard/cli start"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@solana/web3.js": "^1.98.4",
     "@types/node": "^22.13.10",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.1.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
+    "vite-node": "^6.0.0",
     "vitest": "^3.0.8"
   }
 }

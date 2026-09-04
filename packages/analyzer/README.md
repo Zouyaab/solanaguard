@@ -1,8 +1,8 @@
 # @solanaguard/analyzer
 
-Phases 3–6 and 9: transaction input → `NormalizedTransaction`, then optional cluster simulation.
+Phases 3–6 and 9–10, plus composed `analyzeTransaction` used by API/CLI.
 
-Decoding, resolution, curve class, and simulation are **not** a risk assessment. This package does not score risk. It does not recover PDA seeds. A successful simulation is not a safety verdict.
+Decoding, resolution, curve class, simulation, and comparison are **not** a risk assessment by themselves. `analyzeTransaction` attaches deterministic rule findings and a transparent score from `@solanaguard/risk-engine`. None of that is a safety verdict. This package does not recover PDA seeds.
 
 ## What it does
 
@@ -24,9 +24,11 @@ Unknown programs stay `decoded: false` with `decodeStatus: "unknown_program"`. M
 
 `normalizeLocalTransaction` is synchronous and does not call RPC. Curve class still runs locally.
 
+`analyzeTransaction` composes normalize → rules/score → optional simulate/compare for the REST and CLI analyze entry points.
+
 ## What it does not do
 
 - It does not decide if a transaction is safe.
 - It does not recover PDA seeds or prove that a key is a PDA.
-- It does not run risk rules (that is `@solanaguard/risk-engine`).
 - `simulateNormalizedTransaction` is a cluster preview (`replaceRecentBlockhash`, no sig verify).
+- A composed analysis report is still not a proof of safety or of attack.

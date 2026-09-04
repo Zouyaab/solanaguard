@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply min-h-screen bg-atmosphere font-sans text-ink antialiased;
+}
+
+a {
+  @apply text-tide-deep underline-offset-4 transition-colors hover:text-tide hover:underline;
+}
+
+::selection {
+  background: rgba(15, 118, 110, 0.22);
+}
