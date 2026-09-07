@@ -66,17 +66,17 @@ Analysis is an off-chain developer tool. A program does not make parsing safer. 
 
 ## Package responsibilities (target)
 
-| Package                    | Responsibility                                          |
-| -------------------------- | ------------------------------------------------------- |
-| `@solanaguard/types`       | Shared constants and public types                       |
-| `@solanaguard/config`      | Env parsing                                             |
-| `@solanaguard/solana`      | RPC wrapper (Phase 2)                                   |
+| Package                    | Responsibility                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `@solanaguard/types`       | Shared constants and public types                                                                            |
+| `@solanaguard/config`      | Env parsing                                                                                                  |
+| `@solanaguard/solana`      | RPC wrapper (Phase 2)                                                                                        |
 | `@solanaguard/analyzer`    | Normalize (3), decode (4), resolve (5), curve class (6), simulate (9), compare (10), analyze compose (11/13) |
-| `@solanaguard/risk-engine` | Rules (Phase 7) + transparent score (Phase 8)           |
-| `@solanaguard/sdk`         | HTTP client for apps/api (Phase 12)                     |
-| `@solanaguard/api`         | HTTP surface + OpenAPI (Phase 11)                       |
-| `@solanaguard/cli`         | Developer CLI (Phase 13 full commands)                  |
-| `apps/web`                 | Next.js dashboard (Phase 14)                            |
+| `@solanaguard/risk-engine` | Rules (Phase 7) + transparent score (Phase 8)                                                                |
+| `@solanaguard/sdk`         | HTTP client for apps/api (Phase 12)                                                                          |
+| `@solanaguard/api`         | HTTP surface + OpenAPI (Phase 11)                                                                            |
+| `@solanaguard/cli`         | Developer CLI (Phase 13 full commands)                                                                       |
+| `apps/web`                 | Next.js dashboard (Phase 14)                                                                                 |
 
 ## Request path (Phase 11 analyze / Phase 16 hardened)
 

@@ -25,13 +25,13 @@ Client (SDK / CLI / dashboard / wallet demo)
 
 ## Choose a surface
 
-| Goal | Use |
-| --- | --- |
-| HTTP integration | [api.md](./api.md) + OpenAPI at `/documentation` |
-| TypeScript client | [sdk.md](./sdk.md) |
-| Local developer CLI | [cli.md](./cli.md) |
-| Browser UI | [dashboard.md](./dashboard.md) |
-| Wallet connect demo | [wallet-demo.md](./wallet-demo.md) |
+| Goal                | Use                                              |
+| ------------------- | ------------------------------------------------ |
+| HTTP integration    | [api.md](./api.md) + OpenAPI at `/documentation` |
+| TypeScript client   | [sdk.md](./sdk.md)                               |
+| Local developer CLI | [cli.md](./cli.md)                               |
+| Browser UI          | [dashboard.md](./dashboard.md)                   |
+| Wallet connect demo | [wallet-demo.md](./wallet-demo.md)               |
 
 ## Honest reading of a report
 
@@ -43,12 +43,12 @@ A `TransactionAnalysisReport` may include:
 
 Interpret carefully:
 
-| Observation | Means |
-| --- | --- |
-| Empty findings / score `0` | No built-in rule fired — **not** a pass |
-| Successful simulation | Cluster preview with `replaceRecentBlockhash` — **not** a guarantee |
-| `matched` comparison | Expectations aligned with that preview — **not** proof of safety |
-| `unknown_program` | Missing decoder coverage — **not** evidence of malice |
+| Observation                | Means                                                               |
+| -------------------------- | ------------------------------------------------------------------- |
+| Empty findings / score `0` | No built-in rule fired — **not** a pass                             |
+| Successful simulation      | Cluster preview with `replaceRecentBlockhash` — **not** a guarantee |
+| `matched` comparison       | Expectations aligned with that preview — **not** proof of safety    |
+| `unknown_program`          | Missing decoder coverage — **not** evidence of malice               |
 
 See [limitations.md](./limitations.md) and [rules.md](./rules.md).
 

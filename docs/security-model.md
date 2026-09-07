@@ -11,14 +11,14 @@ SolanaGuard is an off-chain analysis tool. Phase 16 hardens the HTTP edge withou
 
 ## What Phase 16 enforces
 
-| Control | Default | Env |
-| --- | --- | --- |
-| JSON body size limit | 16384 bytes | `API_BODY_LIMIT_BYTES` |
-| Inbound request timeout | 60000 ms (0 disables) | `API_REQUEST_TIMEOUT_MS` |
-| RPC HTTP timeout | 20000 ms | `RPC_TIMEOUT_MS` |
-| Rate limit | 60 requests / 60000 ms per client | `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MS` |
-| Transaction base64 length | Solana 1232-byte packet bound | enforced in API helpers |
-| Forbidden secret fields | rejected with HTTP 400 | — |
+| Control                   | Default                           | Env                                      |
+| ------------------------- | --------------------------------- | ---------------------------------------- |
+| JSON body size limit      | 16384 bytes                       | `API_BODY_LIMIT_BYTES`                   |
+| Inbound request timeout   | 60000 ms (0 disables)             | `API_REQUEST_TIMEOUT_MS`                 |
+| RPC HTTP timeout          | 20000 ms                          | `RPC_TIMEOUT_MS`                         |
+| Rate limit                | 60 requests / 60000 ms per client | `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MS` |
+| Transaction base64 length | Solana 1232-byte packet bound     | enforced in API helpers                  |
+| Forbidden secret fields   | rejected with HTTP 400            | —                                        |
 
 Health, version, and OpenAPI document routes skip rate limiting so operators can probe liveness.
 

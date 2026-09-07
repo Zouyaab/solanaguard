@@ -44,19 +44,19 @@ const report = await analyzeTransaction("<base64>", {
 
 ## Other methods
 
-| Method | API |
-| --- | --- |
-| `health()` | `GET /api/v1/health` |
-| `version()` | `GET /api/v1/version` |
-| `rpcStatus()` | `GET /api/v1/rpc/status` |
-| `getAccount(address)` | `GET /api/v1/account/:address` |
-| `getProgram(programId)` | `GET /api/v1/program/:programId` |
-| `getTransaction(signature)` | `GET /api/v1/transaction/:signature` |
-| `simulateTransaction(input)` | `POST /api/v1/simulate/transaction` |
-| `normalizeTransaction(input)` | `POST /api/v1/transactions/normalize` |
-| `evaluateRules(input)` | `POST /api/v1/transactions/evaluate-rules` |
-| `scoreTransaction(input)` | `POST /api/v1/transactions/score` |
-| `compareTransaction(input)` | `POST /api/v1/transactions/compare` |
+| Method                        | API                                        |
+| ----------------------------- | ------------------------------------------ |
+| `health()`                    | `GET /api/v1/health`                       |
+| `version()`                   | `GET /api/v1/version`                      |
+| `rpcStatus()`                 | `GET /api/v1/rpc/status`                   |
+| `getAccount(address)`         | `GET /api/v1/account/:address`             |
+| `getProgram(programId)`       | `GET /api/v1/program/:programId`           |
+| `getTransaction(signature)`   | `GET /api/v1/transaction/:signature`       |
+| `simulateTransaction(input)`  | `POST /api/v1/simulate/transaction`        |
+| `normalizeTransaction(input)` | `POST /api/v1/transactions/normalize`      |
+| `evaluateRules(input)`        | `POST /api/v1/transactions/evaluate-rules` |
+| `scoreTransaction(input)`     | `POST /api/v1/transactions/score`          |
+| `compareTransaction(input)`   | `POST /api/v1/transactions/compare`        |
 
 ## Honesty
 

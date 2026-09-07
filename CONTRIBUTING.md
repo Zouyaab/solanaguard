@@ -12,7 +12,7 @@ Thanks for helping improve SolanaGuard. This project is an **off-chain analysis 
 
 Never claim **secure**, **safe**, **malicious**, **recoverable**, or **unrecoverable** without evidence in code or docs.
 
-Prefer: *potentially risky*, *requires review*, *unknown*, *could not determine*, *simulation indicates*, *program ownership indicates*.
+Prefer: _potentially risky_, _requires review_, _unknown_, _could not determine_, _simulation indicates_, _program ownership indicates_.
 
 Empty findings, score `0`, or a successful simulation still mean **incomplete coverage or a cluster preview** — not a pass.
 
@@ -39,12 +39,12 @@ pnpm build
 
 Useful commands:
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev` | API on Devnet-configured RPC |
-| `pnpm test:devnet` | Opt-in live Devnet tests |
-| `pnpm bench` | Measured offline micro-benchmarks |
-| `pnpm cli -- --help` | CLI after build |
+| Command              | Purpose                           |
+| -------------------- | --------------------------------- |
+| `pnpm dev`           | API on Devnet-configured RPC      |
+| `pnpm test:devnet`   | Opt-in live Devnet tests          |
+| `pnpm bench`         | Measured offline micro-benchmarks |
+| `pnpm cli -- --help` | CLI after build                   |
 
 ## Pull request checklist
 

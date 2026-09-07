@@ -6,12 +6,15 @@ Default CI stays offline (no public Devnet dependency). Reports produced in test
 
 ```bash
 pnpm lint
+pnpm format:check
 pnpm typecheck
-pnpm test
+pnpm test:coverage
 pnpm build
 ```
 
 Unit tests live next to source (`*.test.ts`). Offline fixture pipeline tests live under `tests/` (Phase 17).
+
+Coverage uses the Vitest V8 provider with text + lcov reporters and enforced 70% thresholds for lines, statements, functions, and branches (`pnpm test:coverage`).
 
 ## Live Devnet (opt-in)
 

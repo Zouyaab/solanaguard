@@ -24,14 +24,14 @@ See [configuration.md](./configuration.md).
 
 ## Pages
 
-| Path | Purpose |
-| --- | --- |
-| `/` | Landing / quick lookups |
-| `/analyze` | Paste base64 or signature; render composed report |
-| `/account/[address]` | Account fetch |
-| `/program/[programId]` | Program fetch |
-| `/transaction/[signature]` | Confirmed transaction fetch |
-| `/docs` | Short in-app notes |
+| Path                       | Purpose                                           |
+| -------------------------- | ------------------------------------------------- |
+| `/`                        | Landing / quick lookups                           |
+| `/analyze`                 | Paste base64 or signature; render composed report |
+| `/account/[address]`       | Account fetch                                     |
+| `/program/[programId]`     | Program fetch                                     |
+| `/transaction/[signature]` | Confirmed transaction fetch                       |
+| `/docs`                    | Short in-app notes                                |
 
 ## Honesty
 

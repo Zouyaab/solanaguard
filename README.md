@@ -20,37 +20,37 @@ AI will never be the security decision-maker. If an explanation layer is added l
 
 ## Current capabilities (honest)
 
-| Capability                                           | Status                            |
-| ---------------------------------------------------- | --------------------------------- |
-| Monorepo, TypeScript, lint, format, tests, CI        | Implemented (Phase 1)             |
-| Config loading (`SOLANA_RPC_URL`, `API_PORT`, …)     | Implemented                       |
-| HTTP API health + version                            | Implemented                       |
-| CLI `--version` / help                               | Implemented                       |
-| Solana RPC client                                    | Implemented (Phase 2)             |
-| GET `/api/v1/rpc/status`, `/account`, `/transaction` | Implemented (read-only RPC)       |
-| CLI `rpc-status` / `account`                         | Implemented                       |
-| Transaction normalization (`NormalizedTransaction`)  | Implemented (Phase 3)             |
-| POST `/api/v1/transactions/normalize`                | Implemented (includes decode)     |
-| CLI `normalize --base64` / `--signature`             | Implemented                       |
-| Instruction decoding (plugin registry)               | Implemented (Phase 4)             |
-| Account resolution (RPC snapshots + ALT load)        | Implemented (Phase 5)             |
-| On/off-curve key classification                      | Implemented (Phase 6)             |
-| Deterministic rule findings                          | Implemented (Phase 7)             |
-| Transparent risk score                               | Implemented (Phase 8)             |
-| Simulation normalization                             | Implemented (Phase 9)             |
-| Expected vs simulated comparison                     | Implemented (Phase 10)            |
-| Transaction risk analysis                            | Implemented (composed analyze)    |
-| REST analyze endpoints + OpenAPI                     | Implemented (Phase 11)            |
-| SDK (`@solanaguard/sdk`)                             | Implemented (Phase 12)            |
-| Full CLI analyze commands                            | Implemented (Phase 13)            |
-| Web dashboard                                        | Implemented (Phase 14)            |
-| Wallet demo (Devnet, no auto-sign)                   | Implemented (Phase 15)            |
-| API hardening (limits, timeouts, rate limit)         | Implemented (Phase 16)            |
-| Fixture + opt-in Devnet tests                        | Implemented (Phase 17)            |
-| Measured micro-benchmarks (`pnpm bench`)             | Implemented (Phase 18)            |
-| CONTRIBUTING / SECURITY / CODE_OF_CONDUCT            | Implemented (Phase 19)            |
-| Docs completeness (index + reference set)            | Implemented (Phase 20)            |
-| On-chain program                                     | **Not planned for MVP**           |
+| Capability                                           | Status                         |
+| ---------------------------------------------------- | ------------------------------ |
+| Monorepo, TypeScript, lint, format, tests, CI        | Implemented (Phase 1)          |
+| Config loading (`SOLANA_RPC_URL`, `API_PORT`, …)     | Implemented                    |
+| HTTP API health + version                            | Implemented                    |
+| CLI `--version` / help                               | Implemented                    |
+| Solana RPC client                                    | Implemented (Phase 2)          |
+| GET `/api/v1/rpc/status`, `/account`, `/transaction` | Implemented (read-only RPC)    |
+| CLI `rpc-status` / `account`                         | Implemented                    |
+| Transaction normalization (`NormalizedTransaction`)  | Implemented (Phase 3)          |
+| POST `/api/v1/transactions/normalize`                | Implemented (includes decode)  |
+| CLI `normalize --base64` / `--signature`             | Implemented                    |
+| Instruction decoding (plugin registry)               | Implemented (Phase 4)          |
+| Account resolution (RPC snapshots + ALT load)        | Implemented (Phase 5)          |
+| On/off-curve key classification                      | Implemented (Phase 6)          |
+| Deterministic rule findings                          | Implemented (Phase 7)          |
+| Transparent risk score                               | Implemented (Phase 8)          |
+| Simulation normalization                             | Implemented (Phase 9)          |
+| Expected vs simulated comparison                     | Implemented (Phase 10)         |
+| Transaction risk analysis                            | Implemented (composed analyze) |
+| REST analyze endpoints + OpenAPI                     | Implemented (Phase 11)         |
+| SDK (`@solanaguard/sdk`)                             | Implemented (Phase 12)         |
+| Full CLI analyze commands                            | Implemented (Phase 13)         |
+| Web dashboard                                        | Implemented (Phase 14)         |
+| Wallet demo (Devnet, no auto-sign)                   | Implemented (Phase 15)         |
+| API hardening (limits, timeouts, rate limit)         | Implemented (Phase 16)         |
+| Fixture + opt-in Devnet tests                        | Implemented (Phase 17)         |
+| Measured micro-benchmarks (`pnpm bench`)             | Implemented (Phase 18)         |
+| CONTRIBUTING / SECURITY / CODE_OF_CONDUCT            | Implemented (Phase 19)         |
+| Docs completeness (index + reference set)            | Implemented (Phase 20)         |
+| On-chain program                                     | **Not planned for MVP**        |
 
 ## Requirements
 
@@ -65,7 +65,7 @@ copy .env.example .env
 pnpm install
 pnpm lint
 pnpm typecheck
-pnpm test
+pnpm test:coverage
 pnpm build
 pnpm dev
 ```
@@ -75,6 +75,7 @@ Then:
 ```text
 GET http://127.0.0.1:3001/api/v1/health
 GET http://127.0.0.1:3001/api/v1/version
+GET http://127.0.0.1:3001/api/v1/metrics
 GET http://127.0.0.1:3001/api/v1/rpc/status
 GET http://127.0.0.1:3001/api/v1/account/11111111111111111111111111111111
 GET http://127.0.0.1:3001/api/v1/program/11111111111111111111111111111111
@@ -95,6 +96,56 @@ POST http://127.0.0.1:3001/api/v1/transactions/compare
 OpenAPI UI: http://127.0.0.1:3001/documentation
 OpenAPI JSON: http://127.0.0.1:3001/api/v1/openapi.json
 ```
+
+### Docker quick start
+
+No Solana credentials are required for process health. Public Devnet RPC is the default.
+
+```bash
+docker compose up --build
+```
+
+Verify:
+
+```bash
+curl http://127.0.0.1:3001/api/v1/health
+```
+
+Expected JSON includes `"status":"ok"`. Metrics (no request payloads): `GET /api/v1/metrics`.
+
+### Development commands
+
+| Command                                | Purpose                                  |
+| -------------------------------------- | ---------------------------------------- |
+| `pnpm lint`                            | ESLint                                   |
+| `pnpm format:check`                    | Prettier check                           |
+| `pnpm typecheck`                       | TypeScript project references            |
+| `pnpm test`                            | Vitest (unit/integration)                |
+| `pnpm test:coverage`                   | Vitest with V8 coverage (70% thresholds) |
+| `pnpm build`                           | Build all workspace packages/apps        |
+| `pnpm dev`                             | API on `:3001`                           |
+| `pnpm audit --prod --audit-level=high` | Production dependency audit              |
+
+### Environment variables
+
+See [`.env.example`](./.env.example) and [docs/configuration.md](./docs/configuration.md). Notable:
+
+- `LOG_LEVEL` — Fastify/Pino level (`info` default)
+- `NEXT_PUBLIC_SOLANAGUARD_API_URL` — dashboard API base URL
+- `SOLANAGUARD_BENCH_WARMUP` / `SOLANAGUARD_BENCH_ITERATIONS` — `pnpm bench`
+
+### Logging & security notes
+
+- Structured JSON logs via Fastify/Pino; configure with `LOG_LEVEL`.
+- Authorization headers, cookies, and known secret body fields are redacted.
+- 5xx responses never include stack traces; errors log `requestId`, route, method, and status.
+- API bodies reject private-key / seed / password fields and oversized payloads.
+
+### Troubleshooting
+
+- **Health works, RPC status fails:** public Devnet may be rate-limited; set `SOLANA_RPC_URL` to another HTTPS endpoint.
+- **Docker healthcheck fails:** wait for the start period; confirm `API_PORT=3001` and `API_HOST=0.0.0.0` inside the container.
+- **Coverage fails locally:** run `pnpm test:coverage` and inspect `coverage/lcov.info` / the text report for gaps.
 
 CLI (after `pnpm build`):
 

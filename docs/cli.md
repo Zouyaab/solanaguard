@@ -14,27 +14,27 @@ Requires `.env` / environment as in [configuration.md](./configuration.md) (`SOL
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `--version` / `-v` | Print package version |
-| `rpc-status` | Cluster reachability for configured RPC |
-| `account <ADDRESS>` | Account snapshot + curve class |
-| `program <PROGRAM_ID>` | Program account; `executable` is not a safety verdict |
-| `transaction <SIGNATURE>` | Confirmed transaction fetch |
-| `normalize …` | `NormalizedTransaction` JSON |
-| `rules …` | Findings only (no score object on the evaluation alone) |
-| `score …` | Evaluation + transparent score |
-| `simulate …` | Simulation preview |
-| `compare …` | Expected vs simulated observations |
-| `analyze …` | Composed report (human text by default) |
+| Command                   | Purpose                                                 |
+| ------------------------- | ------------------------------------------------------- |
+| `--version` / `-v`        | Print package version                                   |
+| `rpc-status`              | Cluster reachability for configured RPC                 |
+| `account <ADDRESS>`       | Account snapshot + curve class                          |
+| `program <PROGRAM_ID>`    | Program account; `executable` is not a safety verdict   |
+| `transaction <SIGNATURE>` | Confirmed transaction fetch                             |
+| `normalize …`             | `NormalizedTransaction` JSON                            |
+| `rules …`                 | Findings only (no score object on the evaluation alone) |
+| `score …`                 | Evaluation + transparent score                          |
+| `simulate …`              | Simulation preview                                      |
+| `compare …`               | Expected vs simulated observations                      |
+| `analyze …`               | Composed report (human text by default)                 |
 
 Transaction commands accept `--base64 <TX>`, `--signature <SIGNATURE>`, or a positional base64 string.
 
 ### Analyze flags
 
-| Flag | Effect |
-| --- | --- |
-| `--json` | Full `TransactionAnalysisReport` JSON |
+| Flag              | Effect                                              |
+| ----------------- | --------------------------------------------------- |
+| `--json`          | Full `TransactionAnalysisReport` JSON               |
 | `--no-simulation` | Skip simulate/compare (still normalizes and scores) |
 
 Examples:

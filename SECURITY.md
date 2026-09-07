@@ -4,10 +4,10 @@ SolanaGuard analyzes Solana transactions **without** taking custody of keys. Rep
 
 ## Supported versions
 
-| Version | Supported |
-| --- | --- |
+| Version                                  | Supported                                      |
+| ---------------------------------------- | ---------------------------------------------- |
 | `0.1.x` (this repository’s current line) | Yes — best-effort while the project is pre-1.0 |
-| Older / unreleased forks | No guarantee |
+| Older / unreleased forks                 | No guarantee                                   |
 
 Pre-1.0 APIs may change. Security fixes are applied to the current default branch when feasible.
 
