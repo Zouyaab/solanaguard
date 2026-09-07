@@ -23,8 +23,7 @@ export const FORBIDDEN_SECRET_FIELDS = [
 ] as const;
 
 /** Max base64 character length for a Solana packet (with small padding margin). */
-export const MAX_TRANSACTION_BASE64_CHARS =
-  Math.ceil(MAX_SOLANA_TRANSACTION_BYTES / 3) * 4 + 16;
+export const MAX_TRANSACTION_BASE64_CHARS = Math.ceil(MAX_SOLANA_TRANSACTION_BYTES / 3) * 4 + 16;
 
 export function findForbiddenSecretField(body: unknown): string | null {
   if (body === null || typeof body !== "object" || Array.isArray(body)) {

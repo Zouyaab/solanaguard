@@ -1,8 +1,10 @@
 /**
- * Fastify JSON Schema fragments for Phase 11 request validation and OpenAPI.
+ * Fastify JSON Schema fragments for request validation and OpenAPI.
  * Response bodies stay loosely typed so NormalizedTransaction evolution does not
  * require regenerating a giant OpenAPI tree every phase.
  */
+
+const BASE58_PATTERN = "^[1-9A-HJ-NP-Za-km-z]+$";
 
 export const errorResponseSchema = {
   type: "object",
@@ -20,6 +22,7 @@ export const transactionInputBodySchema = {
     base64: {
       type: "string",
       description: "Wire-format Solana transaction, base64-encoded.",
+      minLength: 1,
       maxLength: 2048,
     },
     signature: {
@@ -27,6 +30,7 @@ export const transactionInputBodySchema = {
       description: "Confirmed transaction signature to fetch from the configured RPC.",
       minLength: 64,
       maxLength: 128,
+      pattern: BASE58_PATTERN,
     },
     includeSimulation: {
       type: "boolean",
@@ -47,6 +51,7 @@ export const addressParamSchema = {
       description: "Base58 Solana address.",
       minLength: 32,
       maxLength: 64,
+      pattern: BASE58_PATTERN,
     },
   },
 } as const;
@@ -61,6 +66,7 @@ export const signatureParamSchema = {
       description: "Base58 transaction signature.",
       minLength: 64,
       maxLength: 128,
+      pattern: BASE58_PATTERN,
     },
   },
 } as const;
@@ -75,6 +81,7 @@ export const programIdParamSchema = {
       description: "Base58 program account address.",
       minLength: 32,
       maxLength: 64,
+      pattern: BASE58_PATTERN,
     },
   },
 } as const;

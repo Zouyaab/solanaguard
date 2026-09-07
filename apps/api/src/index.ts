@@ -7,6 +7,7 @@ async function main(): Promise<void> {
   const rpc = createSolanaRpc(config);
   const app = await buildApp({
     logger: true,
+    logLevel: config.logLevel,
     rpc,
     hardening: {
       bodyLimitBytes: config.apiBodyLimitBytes,
@@ -22,7 +23,7 @@ async function main(): Promise<void> {
     app.log.info(`OpenAPI UI at ${address}/documentation`);
     app.log.info(`Solana RPC ${rpc.endpointLabel()}`);
     app.log.info(
-      `Hardening: bodyLimit=${config.apiBodyLimitBytes}B rateLimit=${config.rateLimitMax}/${config.rateLimitTimeWindowMs}ms rpcTimeout=${config.rpcTimeoutMs}ms`,
+      `Hardening: bodyLimit=${config.apiBodyLimitBytes}B rateLimit=${config.rateLimitMax}/${config.rateLimitTimeWindowMs}ms rpcTimeout=${config.rpcTimeoutMs}ms logLevel=${config.logLevel}`,
     );
   } catch (error) {
     app.log.error(error);

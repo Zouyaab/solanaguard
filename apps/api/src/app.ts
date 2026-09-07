@@ -3,12 +3,9 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import rateLimit from "@fastify/rate-limit";
 import {
-  classifyAddress,
   compareNormalizedTransaction,
   normalizeTransaction,
   simulateNormalizedTransaction,
-  TransactionNotFoundError,
-  type TransactionInput,
 } from "@solanaguard/analyzer";
 import { evaluateAndScore, evaluateRules } from "@solanaguard/risk-engine";
 import {
@@ -23,18 +20,13 @@ import {
   type HealthStatus,
   type NormalizedTransaction,
 } from "@solanaguard/types";
-import {
-  InvalidAddressError,
-  InvalidTransactionError,
-  RpcRequestError,
-  type NormalizedAccount,
-  type SolanaRpc,
-} from "@solanaguard/solana";
+import type { SolanaRpc } from "@solanaguard/solana";
 import { analyzeTransaction, TRANSACTION_ANALYSIS_NOTE } from "./analysis.js";
-import {
-  findForbiddenSecretField,
-  validateTransactionBase64,
-} from "./hardening.js";
+import { jsonAccount } from "./account-json.js";
+import { findForbiddenSecretField } from "./hardening.js";
+import { createLoggerConfig, registerStructuredErrorLogging } from "./logging.js";
+import { MetricsRegistry, registerMetrics } from "./metrics.js";
+import { sendRpcError } from "./rpc-errors.js";
 import {
   addressParamSchema,
   errorResponseSchema,
@@ -42,6 +34,16 @@ import {
   signatureParamSchema,
   transactionInputBodySchema,
 } from "./schemas.js";
+import {
+  isSignatureInput,
+  parseTransactionFields,
+  toTransactionInput,
+} from "./transaction-body.js";
+import {
+  validateAddressParam,
+  validateProgramIdParam,
+  validateSignatureParam,
+} from "./validation.js";
 
 export interface HardeningOptions {
   bodyLimitBytes?: number;
@@ -53,107 +55,15 @@ export interface HardeningOptions {
 }
 
 export interface AppOptions {
-  logger?: boolean;
+  /** Legacy boolean, or structured logger options. Default false in tests. */
+  logger?: boolean | { level?: string; stream?: { write(chunk: string): void } };
+  logLevel?: string;
   rpc?: SolanaRpc;
   hardening?: HardeningOptions;
-}
-
-function jsonAccount(account: NormalizedAccount) {
-  const curve = classifyAddress(account.address);
-  return {
-    address: account.address,
-    lamports: account.lamports.toString(),
-    owner: account.owner,
-    executable: account.executable,
-    rentEpoch: account.rentEpoch?.toString() ?? null,
-    dataLength: account.dataLength,
-    dataBase64: account.dataBase64,
-    onCurve: curve.onCurve,
-    curveClass: curve.curveClass,
-  };
-}
-
-function sendRpcError(reply: FastifyReply, error: unknown) {
-  if (error instanceof TransactionNotFoundError) {
-    return reply.code(404).send({
-      found: false,
-      signature: error.signature,
-      message: error.message,
-    });
-  }
-  if (error instanceof InvalidAddressError || error instanceof InvalidTransactionError) {
-    return reply.code(400).send({ error: "invalid_request", message: error.message });
-  }
-  if (error instanceof RpcRequestError) {
-    return reply.code(502).send({ error: "rpc_failed", message: error.message });
-  }
-  const message = error instanceof Error ? error.message : "Unknown error";
-  return reply.code(500).send({ error: "internal", message });
-}
-
-interface ParsedTransactionFields {
-  base64?: string;
-  signature?: string;
-  includeSimulation?: boolean;
-}
-
-function parseTransactionFields(
-  body: unknown,
-): ParsedTransactionFields | { error: string } {
-  if (body === null || typeof body !== "object" || Array.isArray(body)) {
-    return { error: "JSON body must be an object with base64 or signature." };
-  }
-  const record = body as Record<string, unknown>;
-  const base64 = record.base64;
-  const signature = record.signature;
-  if (typeof base64 === "string" && typeof signature === "string") {
-    return { error: "Provide either base64 or signature, not both." };
-  }
-  if (typeof base64 !== "string" && typeof signature !== "string") {
-    return { error: "JSON body must include string field base64 or signature." };
-  }
-  if (
-    record.includeSimulation !== undefined &&
-    typeof record.includeSimulation !== "boolean"
-  ) {
-    return { error: "includeSimulation must be a boolean when provided." };
-  }
-  const fields: ParsedTransactionFields = {};
-  if (typeof base64 === "string") {
-    const sizeError = validateTransactionBase64(base64);
-    if (sizeError) {
-      return { error: sizeError };
-    }
-    fields.base64 = base64;
-  }
-  if (typeof signature === "string") {
-    fields.signature = signature;
-  }
-  if (typeof record.includeSimulation === "boolean") {
-    fields.includeSimulation = record.includeSimulation;
-  }
-  return fields;
-}
-
-function toTransactionInput(fields: ParsedTransactionFields): TransactionInput | null {
-  if (typeof fields.base64 === "string") {
-    return { source: "base64", base64: fields.base64 };
-  }
-  if (typeof fields.signature === "string") {
-    return { source: "signature", signature: fields.signature };
-  }
-  return null;
-}
-
-function isSignatureInput(
-  input: TransactionInput,
-): input is { source: "signature"; signature: string } {
-  return (
-    typeof input === "object" &&
-    !(input instanceof Uint8Array) &&
-    "source" in input &&
-    input.source === "signature"
-  );
+  /** Shared metrics registry (tests can inject). */
+  metrics?: MetricsRegistry;
+  /** When false, skips metrics hooks (rare). Default true. */
+  enableMetrics?: boolean;
 }
 
 export async function buildApp(options: AppOptions = {}): Promise<FastifyInstance> {
@@ -161,13 +71,42 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   const bodyLimit = hardening.bodyLimitBytes ?? DEFAULT_API_BODY_LIMIT_BYTES;
   const requestTimeoutMs = hardening.requestTimeoutMs ?? DEFAULT_API_REQUEST_TIMEOUT_MS;
   const enableRateLimit = hardening.enableRateLimit !== false;
+  const metrics = options.metrics ?? new MetricsRegistry();
+
+  let loggerConfig: boolean | object = false;
+  if (options.logger === true) {
+    loggerConfig = createLoggerConfig({ level: options.logLevel ?? "info" });
+  } else if (options.logger && typeof options.logger === "object") {
+    const loggerInput: { level?: string; stream?: { write(chunk: string): void } } = {
+      level: options.logger.level ?? options.logLevel ?? "info",
+    };
+    if (options.logger.stream) {
+      loggerInput.stream = options.logger.stream;
+    }
+    loggerConfig = createLoggerConfig(loggerInput);
+  } else if (typeof options.logLevel === "string") {
+    loggerConfig = createLoggerConfig({ level: options.logLevel });
+  }
 
   const app = Fastify({
-    logger: options.logger ?? false,
+    logger: loggerConfig,
     bodyLimit,
     requestTimeout: requestTimeoutMs,
+    requestIdHeader: "x-request-id",
+    genReqId: (req) => {
+      const header = req.headers["x-request-id"];
+      if (typeof header === "string" && header.trim()) {
+        return header.trim().slice(0, 128);
+      }
+      return `sg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    },
   });
   const rpc = options.rpc;
+
+  registerStructuredErrorLogging(app);
+  if (options.enableMetrics !== false) {
+    registerMetrics(app, metrics);
+  }
 
   if (enableRateLimit) {
     await app.register(rateLimit, {
@@ -216,7 +155,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       },
       servers: [{ url: "http://127.0.0.1:3001", description: "Local development" }],
       tags: [
-        { name: "system", description: "Process health and version" },
+        { name: "system", description: "Process health, version, and metrics" },
         { name: "rpc", description: "Read-only Solana RPC helpers" },
         { name: "transactions", description: "Normalize, rules, score, simulate, compare" },
         { name: "analyze", description: "Composed analysis report" },
@@ -239,7 +178,8 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       schema: {
         tags: ["system"],
         summary: "Process health",
-        description: "Reports that the HTTP process is running. Does not imply Solana RPC reachability.",
+        description:
+          "Reports that the HTTP process is running. Does not imply Solana RPC reachability.",
         response: {
           200: {
             type: "object",
@@ -296,6 +236,31 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   );
 
   app.get(
+    "/api/v1/metrics",
+    {
+      config: { rateLimit: false },
+      schema: {
+        tags: ["system"],
+        summary: "Process metrics",
+        description:
+          "Lightweight in-process counters. Does not include request payloads, keys, or RPC credentials.",
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              requestsTotal: { type: "number" },
+              errorsTotal: { type: "number" },
+              requestDurationMsAvg: { type: "number" },
+              requestDurationMsMax: { type: "number" },
+            },
+          },
+        },
+      },
+    },
+    async () => metrics.snapshot(),
+  );
+
+  app.get(
     "/api/v1/openapi.json",
     {
       config: { rateLimit: false },
@@ -348,8 +313,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       schema: {
         tags: ["rpc"],
         summary: "Fetch a Solana account",
-        description:
-          "Returns account data when present. Missing accounts are not risk findings.",
+        description: "Returns account data when present. Missing accounts are not risk findings.",
         params: addressParamSchema,
         response: {
           400: errorResponseSchema,
@@ -359,6 +323,10 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       },
     },
     async (request, reply) => {
+      const invalid = validateAddressParam(request.params.address);
+      if (invalid) {
+        return reply.code(400).send({ error: "invalid_request", message: invalid });
+      }
       if (!rpc) {
         return reply.code(503).send({
           error: "rpc_not_configured",
@@ -398,6 +366,10 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       },
     },
     async (request, reply) => {
+      const invalid = validateProgramIdParam(request.params.programId);
+      if (invalid) {
+        return reply.code(400).send({ error: "invalid_request", message: invalid });
+      }
       if (!rpc) {
         return reply.code(503).send({
           error: "rpc_not_configured",
@@ -443,6 +415,10 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
       },
     },
     async (request, reply) => {
+      const invalid = validateSignatureParam(request.params.signature);
+      if (invalid) {
+        return reply.code(400).send({ error: "invalid_request", message: invalid });
+      }
       if (!rpc) {
         return reply.code(503).send({
           error: "rpc_not_configured",
