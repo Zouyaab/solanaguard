@@ -18,12 +18,6 @@ The primary audience is wallet developers, dApp developers, security researchers
 
 AI will never be the security decision-maker. If an explanation layer is added later, it will only describe findings that the rule engine already produced.
 
-## Why a new repository?
-
-The currently open workspace (`clearscript-imr`) is a Python Streamlit medical-form OCR application. SolanaGuard is a TypeScript Solana developer tool. Mixing them would pollute both products. This repository is standalone:
-
-`C:\Users\Zouyaab Hussain\solanaguard`
-
 ## Current capabilities (honest)
 
 | Capability                                           | Status                            |
