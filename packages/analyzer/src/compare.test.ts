@@ -36,9 +36,7 @@ function transferInstruction(
   };
 }
 
-function baseTransaction(
-  overrides: Partial<NormalizedTransaction> = {},
-): NormalizedTransaction {
+function baseTransaction(overrides: Partial<NormalizedTransaction> = {}): NormalizedTransaction {
   return {
     version: 0,
     feePayer: FROM,

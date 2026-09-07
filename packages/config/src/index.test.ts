@@ -14,6 +14,7 @@ describe("parseConfig", () => {
     expect(config.apiRequestTimeoutMs).toBe(60_000);
     expect(config.rateLimitMax).toBe(60);
     expect(config.rateLimitTimeWindowMs).toBe(60_000);
+    expect(config.logLevel).toBe("info");
   });
 
   it("rejects an invalid network", () => {
@@ -41,5 +42,10 @@ describe("parseConfig", () => {
 
   it("rejects non-positive rate limits", () => {
     expect(() => parseConfig({ RATE_LIMIT_MAX: "0" })).toThrow(/RATE_LIMIT_MAX/);
+  });
+
+  it("parses and rejects LOG_LEVEL", () => {
+    expect(parseConfig({ LOG_LEVEL: "debug" }).logLevel).toBe("debug");
+    expect(() => parseConfig({ LOG_LEVEL: "verbose" })).toThrow(/LOG_LEVEL/);
   });
 });

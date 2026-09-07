@@ -20,6 +20,8 @@ export interface SolanaGuardConfig {
   rateLimitMax: number;
   /** Rate-limit window in milliseconds. */
   rateLimitTimeWindowMs: number;
+  /** Pino / Fastify log level (trace|debug|info|warn|error|fatal|silent). */
+  logLevel: string;
 }
 
 const NETWORKS: readonly SolanaNetwork[] = ["devnet", "testnet", "mainnet-beta", "localnet"];
@@ -29,6 +31,9 @@ export const DEFAULT_API_BODY_LIMIT_BYTES = 16_384;
 export const DEFAULT_API_REQUEST_TIMEOUT_MS = 60_000;
 export const DEFAULT_RATE_LIMIT_MAX = 60;
 export const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
+export const DEFAULT_LOG_LEVEL = "info";
+
+const LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal", "silent"] as const;
 
 function read(env: NodeJS.ProcessEnv, name: string, fallback: string): string {
   const value = env[name];
@@ -53,6 +58,16 @@ function parsePort(value: string): number {
     throw new Error(`API_PORT must be an integer 1–65535. Received: ${JSON.stringify(value)}`);
   }
   return port;
+}
+
+function parseLogLevel(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if ((LOG_LEVELS as readonly string[]).includes(normalized)) {
+    return normalized;
+  }
+  throw new Error(
+    `LOG_LEVEL must be one of ${LOG_LEVELS.join(", ")}. Received: ${JSON.stringify(value)}`,
+  );
 }
 
 function parsePositiveInt(name: string, value: string, options?: { allowZero?: boolean }): number {
@@ -98,6 +113,7 @@ export function parseConfig(env: NodeJS.ProcessEnv = process.env): SolanaGuardCo
       "RATE_LIMIT_WINDOW_MS",
       read(env, "RATE_LIMIT_WINDOW_MS", String(DEFAULT_RATE_LIMIT_WINDOW_MS)),
     ),
+    logLevel: parseLogLevel(read(env, "LOG_LEVEL", DEFAULT_LOG_LEVEL)),
   };
 }
 

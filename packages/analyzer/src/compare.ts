@@ -3,10 +3,7 @@ import type {
   ComparisonObservation,
   ComparisonStatus,
   ExpectedEffect,
-  NormalizedCompiledInstruction,
   NormalizedTransaction,
-  ResolvedAccountSnapshot,
-  SimulatedAccountView,
   SimulationReport,
 } from "@solanaguard/types";
 import {
@@ -15,6 +12,15 @@ import {
   type SimulatedTransactionView,
 } from "./simulate.js";
 import type { TransactionInput } from "./normalize.js";
+import {
+  asAmountString,
+  namedAddress,
+  obs,
+  parseAmount,
+  postAccount,
+  preLamports,
+  summarize,
+} from "./compare-helpers.js";
 
 export interface ComparedTransactionView extends SimulatedTransactionView {
   comparison: BehaviorComparison;
@@ -25,77 +31,8 @@ export const BEHAVIOR_COMPARISON_NOTE =
   "They are not a safety verdict, not a proof of attack, and not a substitute for review. " +
   "Simulation can differ from later execution (slot, blockhash, fees, competing transactions, program upgrades).";
 
-function namedAddress(
-  instruction: NormalizedCompiledInstruction,
-  name: string,
-): string | null {
-  return instruction.namedAccounts.find((account) => account.name === name)?.address ?? null;
-}
-
-function asAmountString(value: unknown): string | null {
-  if (typeof value === "string" && /^-?\d+$/.test(value)) {
-    return value;
-  }
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return String(Math.trunc(value));
-  }
-  return null;
-}
-
-function parseAmount(value: string | null | undefined): bigint | null {
-  if (value === null || value === undefined || !/^-?\d+$/.test(value)) {
-    return null;
-  }
-  try {
-    return BigInt(value);
-  } catch {
-    return null;
-  }
-}
-
-function obs(
-  partial: Omit<ComparisonObservation, "evidence"> & {
-    evidence?: ComparisonObservation["evidence"];
-  },
-): ComparisonObservation {
-  return { ...partial, evidence: partial.evidence ?? {} };
-}
-
-function summarize(
-  observations: readonly ComparisonObservation[],
-): BehaviorComparison["summary"] {
-  const summary = { matched: 0, diverged: 0, incomplete: 0, notApplicable: 0 };
-  for (const item of observations) {
-    if (item.status === "matched") summary.matched += 1;
-    else if (item.status === "diverged") summary.diverged += 1;
-    else if (item.status === "incomplete") summary.incomplete += 1;
-    else summary.notApplicable += 1;
-  }
-  return summary;
-}
-
-function preLamports(
-  snapshots: readonly ResolvedAccountSnapshot[],
-  address: string,
-): bigint | null {
-  const snapshot = snapshots.find((item) => item.address === address);
-  if (!snapshot || snapshot.presence !== "found") {
-    return null;
-  }
-  return parseAmount(snapshot.lamports);
-}
-
-function postAccount(
-  accounts: readonly SimulatedAccountView[],
-  address: string,
-): SimulatedAccountView | undefined {
-  return accounts.find((item) => item.address === address);
-}
-
 /** Derive expected effects from decoded instructions only. Pure. */
-export function deriveExpectedEffects(
-  transaction: NormalizedTransaction,
-): ExpectedEffect[] {
+export function deriveExpectedEffects(transaction: NormalizedTransaction): ExpectedEffect[] {
   const effects: ExpectedEffect[] = [];
 
   for (const instruction of transaction.instructions) {
@@ -111,8 +48,7 @@ export function deriveExpectedEffects(
         kind: "undecoded_instruction",
         address: null,
         amount: null,
-        detail:
-          "Instruction was not decoded, so no concrete expected effect could be derived.",
+        detail: "Instruction was not decoded, so no concrete expected effect could be derived.",
       });
       continue;
     }
@@ -145,15 +81,11 @@ export function deriveExpectedEffects(
       continue;
     }
 
-    if (
-      instruction.programName === "system_program" &&
-      instruction.instructionType === "Create"
-    ) {
+    if (instruction.programName === "system_program" && instruction.instructionType === "Create") {
       const lamports = asAmountString(instruction.args.lamports);
       const from = namedAddress(instruction, "from");
       const created = namedAddress(instruction, "newAccount");
-      const owner =
-        typeof instruction.args.owner === "string" ? instruction.args.owner : null;
+      const owner = typeof instruction.args.owner === "string" ? instruction.args.owner : null;
       if (from) {
         effects.push({
           ...base,
@@ -182,10 +114,7 @@ export function deriveExpectedEffects(
       continue;
     }
 
-    if (
-      instruction.programName === "system_program" &&
-      instruction.instructionType === "Assign"
-    ) {
+    if (instruction.programName === "system_program" && instruction.instructionType === "Assign") {
       effects.push({
         ...base,
         kind: "owner_assign",
@@ -199,8 +128,7 @@ export function deriveExpectedEffects(
     }
 
     if (
-      (instruction.programName === "spl_token" ||
-        instruction.programName === "spl_token_2022") &&
+      (instruction.programName === "spl_token" || instruction.programName === "spl_token_2022") &&
       (instruction.instructionType === "Transfer" ||
         instruction.instructionType === "TransferChecked")
     ) {
@@ -219,8 +147,7 @@ export function deriveExpectedEffects(
     }
 
     if (
-      (instruction.programName === "spl_token" ||
-        instruction.programName === "spl_token_2022") &&
+      (instruction.programName === "spl_token" || instruction.programName === "spl_token_2022") &&
       instruction.instructionType === "CloseAccount"
     ) {
       effects.push({
@@ -250,10 +177,7 @@ export function deriveExpectedEffects(
 function netExpectedLamports(effects: readonly ExpectedEffect[]): Map<string, bigint> {
   const nets = new Map<string, bigint>();
   for (const effect of effects) {
-    if (
-      (effect.kind !== "lamport_debit" && effect.kind !== "lamport_credit") ||
-      !effect.address
-    ) {
+    if ((effect.kind !== "lamport_debit" && effect.kind !== "lamport_credit") || !effect.address) {
       continue;
     }
     const amount = parseAmount(effect.amount);
@@ -478,8 +402,7 @@ export function compareExpectedToSimulated(
         obs({
           id: `owner_${effect.instructionIndex}`,
           status,
-          title:
-            status === "matched" ? "Owner assignment matched" : "Owner assignment diverged",
+          title: status === "matched" ? "Owner assignment matched" : "Owner assignment diverged",
           explanation:
             status === "matched"
               ? `Simulated owner for ${address} matches expected ${expectedOwner}.`
@@ -546,9 +469,7 @@ export function compareExpectedToSimulated(
       const observedDelta = postLamports - pre;
       if (address === transaction.feePayer) {
         const transferOnlyOk =
-          expectedDelta <= 0n
-            ? observedDelta <= expectedDelta
-            : observedDelta === expectedDelta;
+          expectedDelta <= 0n ? observedDelta <= expectedDelta : observedDelta === expectedDelta;
         observations.push(
           obs({
             id: `lamports_fee_payer_${address}`,
@@ -572,14 +493,12 @@ export function compareExpectedToSimulated(
         continue;
       }
 
-      const status: ComparisonStatus =
-        observedDelta === expectedDelta ? "matched" : "diverged";
+      const status: ComparisonStatus = observedDelta === expectedDelta ? "matched" : "diverged";
       observations.push(
         obs({
           id: `lamports_${address}`,
           status,
-          title:
-            status === "matched" ? "Lamport delta matched" : "Lamport delta diverged",
+          title: status === "matched" ? "Lamport delta matched" : "Lamport delta diverged",
           explanation:
             status === "matched"
               ? `Account ${address} changed by ${observedDelta.toString()} lamports, matching the decoded expectation.`
