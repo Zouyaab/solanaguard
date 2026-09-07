@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      API_HOST: "0.0.0.0"
+      API_PORT: "3001"
+      LOG_LEVEL: "info"
+      SOLANA_RPC_URL: "https://api.devnet.solana.com"
+      SOLANA_NETWORK: "devnet"
+      RPC_TIMEOUT_MS: "20000"
+      API_BODY_LIMIT_BYTES: "16384"
+      API_REQUEST_TIMEOUT_MS: "60000"
+      RATE_LIMIT_MAX: "60"
+      RATE_LIMIT_WINDOW_MS: "60000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
