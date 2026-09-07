@@ -5,11 +5,7 @@
  * does not mean a transaction is safe.
  */
 
-export {
-  SolanaGuardClient,
-  analyzeTransaction,
-  createSolanaGuardClient,
-} from "./client.js";
+export { SolanaGuardClient, analyzeTransaction, createSolanaGuardClient } from "./client.js";
 export {
   SolanaGuardApiError,
   SolanaGuardError,

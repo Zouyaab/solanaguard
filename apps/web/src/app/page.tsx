@@ -64,7 +64,11 @@ export default function HomePage() {
         <h2 className="font-display text-2xl text-ink">Quick lookup</h2>
         <LookupForm kind="account" label="Account address" placeholder="Base58 address" />
         <LookupForm kind="program" label="Program id" placeholder="Base58 program id" />
-        <LookupForm kind="transaction" label="Transaction signature" placeholder="Base58 signature" />
+        <LookupForm
+          kind="transaction"
+          label="Transaction signature"
+          placeholder="Base58 signature"
+        />
       </section>
     </main>
   );

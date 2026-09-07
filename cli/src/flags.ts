@@ -9,10 +9,7 @@ export type ParsedTxFlags =
  * `--json` requests machine-readable output where a command supports it.
  * `--no-simulation` skips simulate/compare for analyze.
  */
-export function parseTransactionArgs(
-  argv: readonly string[],
-  usage: string,
-): ParsedTxFlags {
+export function parseTransactionArgs(argv: readonly string[], usage: string): ParsedTxFlags {
   let base64: string | undefined;
   let signature: string | undefined;
   let includeSimulation = true;

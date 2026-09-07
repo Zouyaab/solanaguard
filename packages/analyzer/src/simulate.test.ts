@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  Keypair,
-  SystemProgram,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { Keypair, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import {
   InvalidTransactionError,
   SolanaRpc,
@@ -57,25 +52,26 @@ function mockRpc(overrides: Partial<SolanaRpcAdapter> = {}): SolanaRpc {
 describe("simulateNormalizedTransaction", () => {
   it("requests unique account keys and maps a JSON-safe report", async () => {
     const transaction = signedTransfer();
-    const adapterSimulate = vi.fn(async (_bytes: Uint8Array, options?: { accounts?: readonly string[] }) =>
-      stubNormalizedSimulation({
-        success: true,
-        error: null,
-        logs: ["Program 11111111111111111111111111111111 success"],
-        unitsConsumed: 150,
-        contextSlot: 77,
-        accountsRequested: [...(options?.accounts ?? [])],
-        accountsReturned: true,
-        accounts: (options?.accounts ?? []).map((address) => ({
-          address,
-          returned: true,
-          lamports: 1,
-          owner: SystemProgram.programId.toBase58(),
-          executable: false,
-          dataLength: 0,
-          dataBase64: "",
-        })),
-      }),
+    const adapterSimulate = vi.fn(
+      async (_bytes: Uint8Array, options?: { accounts?: readonly string[] }) =>
+        stubNormalizedSimulation({
+          success: true,
+          error: null,
+          logs: ["Program 11111111111111111111111111111111 success"],
+          unitsConsumed: 150,
+          contextSlot: 77,
+          accountsRequested: [...(options?.accounts ?? [])],
+          accountsReturned: true,
+          accounts: (options?.accounts ?? []).map((address) => ({
+            address,
+            returned: true,
+            lamports: 1,
+            owner: SystemProgram.programId.toBase58(),
+            executable: false,
+            dataLength: 0,
+            dataBase64: "",
+          })),
+        }),
     );
     const rpc = mockRpc({ simulateTransactionBytes: adapterSimulate });
     const result = await simulateNormalizedTransaction(
@@ -99,10 +95,7 @@ describe("simulateNormalizedTransaction", () => {
   it("treats a missing confirmed signature as not found, not malice", async () => {
     const rpc = mockRpc();
     await expect(
-      simulateNormalizedTransaction(
-        { source: "signature", signature: "1".repeat(88) },
-        { rpc },
-      ),
+      simulateNormalizedTransaction({ source: "signature", signature: "1".repeat(88) }, { rpc }),
     ).rejects.toBeInstanceOf(TransactionNotFoundError);
   });
 

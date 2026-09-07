@@ -6,12 +6,7 @@
  *   pnpm test:devnet
  */
 import { describe, expect, it } from "vitest";
-import {
-  Keypair,
-  SystemProgram,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { Keypair, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { analyzeTransaction } from "@solanaguard/analyzer";
 import { createSolanaRpcFromUrl } from "@solanaguard/solana";
 import { WELL_KNOWN } from "./fixtures/well-known.js";
@@ -54,10 +49,7 @@ describe.skipIf(!enabled)("Devnet analyze pipeline (live)", () => {
     }).compileToV0Message();
     const transaction = new VersionedTransaction(message);
 
-    const report = await analyzeTransaction(
-      { source: "versioned", transaction },
-      { rpc },
-    );
+    const report = await analyzeTransaction({ source: "versioned", transaction }, { rpc });
 
     expect(report.transaction.instructions[0]?.instructionType).toBe("Transfer");
     expect(report.transaction.instructions[0]?.programId).toBe(WELL_KNOWN.systemProgram);

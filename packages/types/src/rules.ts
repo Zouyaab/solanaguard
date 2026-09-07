@@ -26,11 +26,7 @@ export interface RuleEvaluation {
 }
 
 /** How much attention the weighted total suggests. Not a pass/fail. */
-export type RiskScoreBand =
-  | "no_findings"
-  | "informational"
-  | "elevated"
-  | "requires_review";
+export type RiskScoreBand = "no_findings" | "informational" | "elevated" | "requires_review";
 
 export interface ScoreContribution {
   ruleId: string;

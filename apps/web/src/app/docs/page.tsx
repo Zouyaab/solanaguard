@@ -15,8 +15,8 @@ export default function DocsPage() {
         <h2 className="font-display text-2xl text-ink">How the dashboard works</h2>
         <p>
           The web app is a thin client. It uses <code className="font-mono">@solanaguard/sdk</code>{" "}
-          to call the Fastify API. Start the API first (
-          <code className="font-mono">pnpm dev</code>), then the dashboard (
+          to call the Fastify API. Start the API first (<code className="font-mono">pnpm dev</code>
+          ), then the dashboard (
           <code className="font-mono">pnpm --filter @solanaguard/web dev</code>).
         </p>
         <h2 className="font-display text-2xl text-ink">Pages</h2>

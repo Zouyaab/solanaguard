@@ -74,9 +74,7 @@ export function ResourceLookup({ kind, id }: { kind: Kind; id: string }) {
         <h1 className="mt-1 break-all font-mono text-lg text-ink">{id}</h1>
         {busy ? <p className="mt-4 text-sm text-ink-muted">Loading…</p> : null}
         {error ? <p className="mt-4 text-sm text-ember">{error}</p> : null}
-        {data && "note" in data ? (
-          <p className="mt-4 text-sm text-ink-muted">{data.note}</p>
-        ) : null}
+        {data && "note" in data ? <p className="mt-4 text-sm text-ink-muted">{data.note}</p> : null}
       </div>
       {data ? <JsonBlock title="Response" value={data} /> : null}
     </div>

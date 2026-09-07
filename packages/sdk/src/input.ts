@@ -10,8 +10,9 @@ function bytesToBase64(bytes: Uint8Array): string {
   if (typeof btoa === "function") {
     return btoa(binary);
   }
-  const nodeBuffer = (globalThis as { Buffer?: { from(data: Uint8Array): { toString(enc: string): string } } })
-    .Buffer;
+  const nodeBuffer = (
+    globalThis as { Buffer?: { from(data: Uint8Array): { toString(enc: string): string } } }
+  ).Buffer;
   if (nodeBuffer) {
     return nodeBuffer.from(bytes).toString("base64");
   }

@@ -1,10 +1,6 @@
 import { ResourceLookup } from "@/components/ResourceLookup";
 
-export default async function AccountPage({
-  params,
-}: {
-  params: Promise<{ address: string }>;
-}) {
+export default async function AccountPage({ params }: { params: Promise<{ address: string }> }) {
   const { address } = await params;
   return (
     <main className="space-y-6">

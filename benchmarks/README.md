@@ -17,11 +17,11 @@ pnpm bench
 
 ## Layout
 
-| Path | Purpose |
-| --- | --- |
-| `run.ts` | Timed workloads (analyze + API inject) |
-| `stats.ts` | Percentile / summary helpers over measured samples |
-| `stats.test.ts` | Unit tests for stats math |
+| Path            | Purpose                                            |
+| --------------- | -------------------------------------------------- |
+| `run.ts`        | Timed workloads (analyze + API inject)             |
+| `stats.ts`      | Percentile / summary helpers over measured samples |
+| `stats.test.ts` | Unit tests for stats math                          |
 
 ## Rules
 

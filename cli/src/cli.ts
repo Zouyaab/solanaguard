@@ -50,7 +50,10 @@ function mapTxError(error: unknown): CliResult {
 async function withTransactionInput(
   argv: readonly string[],
   usage: string,
-  run: (input: TransactionInput, flags: { includeSimulation: boolean; json: boolean }) => Promise<CliResult>,
+  run: (
+    input: TransactionInput,
+    flags: { includeSimulation: boolean; json: boolean },
+  ) => Promise<CliResult>,
 ): Promise<CliResult> {
   const parsed = parseTransactionArgs(argv, usage);
   if (!parsed.ok) {

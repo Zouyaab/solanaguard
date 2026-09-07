@@ -34,7 +34,10 @@ describe("Fixture analyze pipeline (offline)", () => {
 
   it("flags an unsigned message as info, not malice", async () => {
     const fixture = buildUnsignedTransfer();
-    const report = await analyzeTransaction({ source: "versioned", transaction: fixture.transaction });
+    const report = await analyzeTransaction({
+      source: "versioned",
+      transaction: fixture.transaction,
+    });
 
     expect(report.transaction.signed).toBe(false);
     expect(report.evaluation.findings.some((f) => f.ruleId === "unsigned_message")).toBe(true);
@@ -67,10 +70,7 @@ describe("Fixture analyze pipeline (offline)", () => {
   it("with stub RPC: resolves system program, simulates, and still disclaims safety", async () => {
     const fixture = buildSignedTransfer();
     const rpc = createFixtureRpc();
-    const report = await analyzeTransaction(
-      { source: "base64", base64: fixture.base64 },
-      { rpc },
-    );
+    const report = await analyzeTransaction({ source: "base64", base64: fixture.base64 }, { rpc });
 
     expect(report.transaction.accountResolution.attempted).toBe(true);
     expect(report.transaction.accountResolution.found).toBeGreaterThanOrEqual(1);

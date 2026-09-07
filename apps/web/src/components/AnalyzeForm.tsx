@@ -63,7 +63,10 @@ export function AnalyzeForm() {
   return (
     <div className="space-y-8">
       <DisclaimerBanner />
-      <form onSubmit={onSubmit} className="space-y-5 border border-ink/10 bg-foam/80 p-6 shadow-panel">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-5 border border-ink/10 bg-foam/80 p-6 shadow-panel"
+      >
         <div className="flex flex-wrap gap-3 text-sm">
           <button
             type="button"

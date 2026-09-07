@@ -28,10 +28,7 @@ export type SdkTransactionRequest =
  * Inputs the SDK can encode into an API body.
  * Bytes and bare strings become `{ base64 }`.
  */
-export type SdkTransactionInput =
-  | SdkTransactionRequest
-  | Uint8Array
-  | string;
+export type SdkTransactionInput = SdkTransactionRequest | Uint8Array | string;
 
 export interface SolanaGuardClientOptions {
   /** API origin, e.g. `http://127.0.0.1:3001`. Trailing slash is stripped. */

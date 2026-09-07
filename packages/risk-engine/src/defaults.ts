@@ -32,10 +32,15 @@ const unknownProgram: RiskRule = {
       return null;
     }
     return [
-      finding(unknownProgram, "needs_review", "One or more instructions target a program with no decoder plugin. Missing coverage is not evidence of malice.", {
-        programCount: ids.length,
-        programIds: ids.join(","),
-      }),
+      finding(
+        unknownProgram,
+        "needs_review",
+        "One or more instructions target a program with no decoder plugin. Missing coverage is not evidence of malice.",
+        {
+          programCount: ids.length,
+          programIds: ids.join(","),
+        },
+      ),
     ];
   },
 };

@@ -1,10 +1,6 @@
 import { ResourceLookup } from "@/components/ResourceLookup";
 
-export default async function ProgramPage({
-  params,
-}: {
-  params: Promise<{ programId: string }>;
-}) {
+export default async function ProgramPage({ params }: { params: Promise<{ programId: string }> }) {
   const { programId } = await params;
   return (
     <main className="space-y-6">

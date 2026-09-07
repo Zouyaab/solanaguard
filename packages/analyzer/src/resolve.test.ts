@@ -7,7 +7,12 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { SolanaRpc, stubNormalizedSimulation, type NormalizedAccount, type SolanaRpcAdapter } from "@solanaguard/solana";
+import {
+  SolanaRpc,
+  stubNormalizedSimulation,
+  type NormalizedAccount,
+  type SolanaRpcAdapter,
+} from "@solanaguard/solana";
 import {
   LOOKUPS_UNRESOLVED_NOTE,
   normalizeLocalTransaction,

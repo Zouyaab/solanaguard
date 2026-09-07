@@ -4,13 +4,13 @@ Phase 17 fixture and Devnet integration tests live here. Unit tests stay next to
 
 ## Layout
 
-| Path | Purpose |
-| --- | --- |
-| `fixtures/well-known.ts` | Public program ids (System, Token, Memo, …) |
+| Path                       | Purpose                                             |
+| -------------------------- | --------------------------------------------------- |
+| `fixtures/well-known.ts`   | Public program ids (System, Token, Memo, …)         |
 | `fixtures/transactions.ts` | Locally built transfer / memo / unknown-program txs |
-| `fixtures/mock-rpc.ts` | Explicit stub RPC for offline pipeline tests |
-| `analyze.fixtures.test.ts` | Offline full analyze pipeline (always runs in CI) |
-| `pipeline.devnet.test.ts` | Live Devnet cases (`SOLANAGUARD_DEVNET_IT=1`) |
+| `fixtures/mock-rpc.ts`     | Explicit stub RPC for offline pipeline tests        |
+| `analyze.fixtures.test.ts` | Offline full analyze pipeline (always runs in CI)   |
+| `pipeline.devnet.test.ts`  | Live Devnet cases (`SOLANAGUARD_DEVNET_IT=1`)       |
 
 ## Rules
 

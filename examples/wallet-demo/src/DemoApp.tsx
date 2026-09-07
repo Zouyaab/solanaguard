@@ -33,10 +33,7 @@ export function DemoApp() {
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
 
-  const client = useMemo(
-    () => createSolanaGuardClient({ baseUrl: getApiBaseUrl() }),
-    [],
-  );
+  const client = useMemo(() => createSolanaGuardClient({ baseUrl: getApiBaseUrl() }), []);
 
   useEffect(() => {
     if (!connected) {
@@ -139,8 +136,8 @@ export function DemoApp() {
       </header>
 
       <aside className="banner">
-        <strong>Not a safety verdict.</strong> SolanaGuard reports are observational. This demo never
-        asks for seed phrases or private keys. Mainnet is refused.
+        <strong>Not a safety verdict.</strong> SolanaGuard reports are observational. This demo
+        never asks for seed phrases or private keys. Mainnet is refused.
       </aside>
 
       <section className="panel">
@@ -179,12 +176,20 @@ export function DemoApp() {
         >
           <h2>2. Draft Devnet test transaction</h2>
           <p>Builds an unsigned self-transfer. Signing is not requested yet.</p>
-          <button type="button" onClick={() => void draftTransaction()} disabled={!connected || busy}>
+          <button
+            type="button"
+            onClick={() => void draftTransaction()}
+            disabled={!connected || busy}
+          >
             Draft transaction
           </button>
           {draft ? <pre className="code">{draft.base64.slice(0, 120)}…</pre> : null}
         </li>
-        <li className={step === "review" || step === "sent" ? "done" : step === "analyze" ? "active" : ""}>
+        <li
+          className={
+            step === "review" || step === "sent" ? "done" : step === "analyze" ? "active" : ""
+          }
+        >
           <h2>3. Analyze with SolanaGuard</h2>
           <p>Sends the drafted wire bytes to the API. Requires the API on the configured origin.</p>
           <button type="button" onClick={() => void analyzeDraft()} disabled={!draft || busy}>

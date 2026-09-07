@@ -176,10 +176,7 @@ export class SolanaGuardClient {
           error,
         );
       }
-      throw new SolanaGuardNetworkError(
-        `SolanaGuard request failed: ${method} ${path}`,
-        error,
-      );
+      throw new SolanaGuardNetworkError(`SolanaGuard request failed: ${method} ${path}`, error);
     } finally {
       clearTimeout(timer);
     }

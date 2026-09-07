@@ -76,19 +76,14 @@ function contributionFor(
 /**
  * Score an existing rule evaluation. Pure: no RPC, no mutation of findings.
  */
-export function scoreEvaluation(
-  evaluation: RuleEvaluation,
-  options: ScoreOptions = {},
-): RiskScore {
+export function scoreEvaluation(evaluation: RuleEvaluation, options: ScoreOptions = {}): RiskScore {
   const weights = resolveWeights(options.weights);
   const cap =
     typeof options.cap === "number" && Number.isFinite(options.cap) && options.cap > 0
       ? Math.floor(options.cap)
       : DEFAULT_SCORE_CAP;
 
-  const contributions = evaluation.findings.map((finding) =>
-    contributionFor(finding, weights),
-  );
+  const contributions = evaluation.findings.map((finding) => contributionFor(finding, weights));
   const raw = contributions.reduce((sum, item) => sum + item.points, 0);
   const total = Math.min(cap, raw);
 

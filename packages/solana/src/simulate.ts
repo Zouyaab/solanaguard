@@ -69,10 +69,12 @@ function innerFromUnknown(
       let programId: string | null = null;
       if (typeof programIdField === "string") {
         programId = programIdField;
-      } else if (programIdField && typeof programIdField === "object" && "toBase58" in programIdField) {
-        programId = String(
-          (programIdField as { toBase58: () => string }).toBase58(),
-        );
+      } else if (
+        programIdField &&
+        typeof programIdField === "object" &&
+        "toBase58" in programIdField
+      ) {
+        programId = String((programIdField as { toBase58: () => string }).toBase58());
       } else if (accountKeys[programIdIndex]) {
         programId = accountKeys[programIdIndex] ?? null;
       }

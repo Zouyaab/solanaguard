@@ -24,11 +24,7 @@ export interface ExpectedEffect {
   detail: string;
 }
 
-export type ComparisonStatus =
-  | "matched"
-  | "diverged"
-  | "incomplete"
-  | "not_applicable";
+export type ComparisonStatus = "matched" | "diverged" | "incomplete" | "not_applicable";
 
 export interface ComparisonObservation {
   id: string;

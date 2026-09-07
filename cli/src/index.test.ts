@@ -9,10 +9,7 @@ const TRANSFER_BASE64 =
 
 describe("CLI flags", () => {
   it("accepts positional base64 and shared flags", () => {
-    const parsed = parseTransactionArgs(
-      ["--json", "--no-simulation", TRANSFER_BASE64],
-      "usage",
-    );
+    const parsed = parseTransactionArgs(["--json", "--no-simulation", TRANSFER_BASE64], "usage");
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) {
       return;

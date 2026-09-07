@@ -24,11 +24,11 @@ NEXT_PUBLIC_SOLANAGUARD_API_URL=http://127.0.0.1:3001
 
 ## Pages
 
-| Path | Purpose |
-| --- | --- |
-| `/` | Dashboard + quick lookups |
-| `/analyze` | Paste base64 or signature |
-| `/account/[address]` | Account fetch |
-| `/program/[programId]` | Program fetch |
+| Path                       | Purpose                     |
+| -------------------------- | --------------------------- |
+| `/`                        | Dashboard + quick lookups   |
+| `/analyze`                 | Paste base64 or signature   |
+| `/account/[address]`       | Account fetch               |
+| `/program/[programId]`     | Program fetch               |
 | `/transaction/[signature]` | Confirmed transaction fetch |
-| `/docs` | Short integration notes |
+| `/docs`                    | Short integration notes     |

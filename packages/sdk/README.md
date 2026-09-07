@@ -35,12 +35,12 @@ const again = await analyzeTransaction("<wire transaction>", {
 
 ## Inputs
 
-| Input | API body |
-| --- | --- |
-| `{ base64 }` | passed through |
+| Input           | API body                       |
+| --------------- | ------------------------------ |
+| `{ base64 }`    | passed through                 |
 | `{ signature }` | passed through (API needs RPC) |
-| `Uint8Array` | `{ base64: <encoded> }` |
-| `string` | treated as base64 |
+| `Uint8Array`    | `{ base64: <encoded> }`        |
+| `string`        | treated as base64              |
 
 Serialize `@solana/web3.js` transactions to bytes/base64 before calling the SDK. The SDK does not accept private keys and never signs.
 
@@ -55,11 +55,11 @@ Optional on analyze only: `includeSimulation: false` skips cluster simulation/co
 
 ## Errors
 
-| Class | When |
-| --- | --- |
-| `SolanaGuardRequestError` | Invalid local input |
-| `SolanaGuardNetworkError` | Transport / timeout / non-JSON |
-| `SolanaGuardNotFoundError` | HTTP 404 |
-| `SolanaGuardApiError` | Other non-2xx API responses |
+| Class                      | When                           |
+| -------------------------- | ------------------------------ |
+| `SolanaGuardRequestError`  | Invalid local input            |
+| `SolanaGuardNetworkError`  | Transport / timeout / non-JSON |
+| `SolanaGuardNotFoundError` | HTTP 404                       |
+| `SolanaGuardApiError`      | Other non-2xx API responses    |
 
 See [docs/sdk.md](../../docs/sdk.md) for more detail.
