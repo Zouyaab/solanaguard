@@ -10,3 +10,10 @@ allowBuilds:
   utf-8-validate: false
   sharp: true
   unrs-resolver: true
+
+confirmModulesPurge: false
+
+overrides:
+  # Next currently vendors an older postcss; force the patched release when possible.
+  postcss: "^8.5.18"
+  sharp: "^0.34.5"

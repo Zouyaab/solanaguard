@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -24,7 +24,20 @@ jobs:
         run: pnpm format:check
       - name: Typecheck
         run: pnpm typecheck
-      - name: Test
-        run: pnpm test
+      - name: Test with coverage
+        run: pnpm test:coverage
+      - name: Audit production dependencies (API runtime)
+        run: pnpm audit:prod
       - name: Build
         run: pnpm build
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose file
+        run: docker compose config
+      - name: Build API image
+        run: docker compose build

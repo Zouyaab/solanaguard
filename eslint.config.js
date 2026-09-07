@@ -11,6 +11,7 @@ export default tseslint.config(
       "apps/web/.next/**",
       "apps/web/next-env.d.ts",
       "examples/wallet-demo/dist/**",
+      "scripts/**",
     ],
   },
   js.configs.recommended,
