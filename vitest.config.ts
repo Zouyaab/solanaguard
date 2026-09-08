@@ -2,10 +2,18 @@ import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
 export default defineConfig({
+  esbuild: {
+    jsx: "automatic",
+  },
   test: {
-    include: ["**/*.test.ts"],
-    exclude: ["**/node_modules/**", "**/dist/**", "apps/web/**", "examples/wallet-demo/dist/**"],
+    include: ["**/*.test.ts", "**/*.test.tsx"],
+    exclude: ["**/node_modules/**", "**/dist/**", "examples/wallet-demo/dist/**"],
     environment: "node",
+    environmentMatchGlobs: [
+      ["apps/web/**/*.test.tsx", "jsdom"],
+      ["examples/wallet-demo/**/*.test.tsx", "jsdom"],
+    ],
+    setupFiles: ["./vitest.setup.ts"],
     testTimeout: 30_000,
     coverage: {
       provider: "v8",
@@ -14,17 +22,19 @@ export default defineConfig({
       include: [
         "packages/*/src/**/*.ts",
         "apps/api/src/**/*.ts",
+        "apps/web/src/components/**/*.{ts,tsx}",
+        "apps/web/src/lib/**/*.{ts,tsx}",
         "cli/src/**/*.ts",
         "benchmarks/**/*.ts",
-        "examples/wallet-demo/src/**/*.ts",
+        "examples/wallet-demo/src/**/*.{ts,tsx}",
       ],
       exclude: [
         "**/*.test.ts",
+        "**/*.test.tsx",
         "**/*.devnet.test.ts",
         "**/dist/**",
         "**/node_modules/**",
         "**/.next/**",
-        "apps/web/**",
         // Barrel re-exports and process entrypoints (no meaningful logic).
         "packages/*/src/index.ts",
         "apps/api/src/index.ts",
@@ -35,9 +45,8 @@ export default defineConfig({
         "packages/types/src/rules.ts",
         "packages/types/src/simulation.ts",
         "packages/sdk/src/types.ts",
-        // UI/entry/demo glue and one-shot bench runner.
+        // UI entry/demo glue and one-shot bench runner.
         "examples/wallet-demo/src/main.tsx",
-        "examples/wallet-demo/src/DemoApp.tsx",
         "examples/wallet-demo/src/WalletProviders.tsx",
         "examples/wallet-demo/src/vite-env.d.ts",
         "benchmarks/run.ts",
@@ -68,6 +77,7 @@ export default defineConfig({
         new URL("./packages/risk-engine/src/index.ts", import.meta.url),
       ),
       "@solanaguard/sdk": fileURLToPath(new URL("./packages/sdk/src/index.ts", import.meta.url)),
+      "@": fileURLToPath(new URL("./apps/web/src", import.meta.url)),
     },
   },
 });
