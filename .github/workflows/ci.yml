@@ -7,36 +7,42 @@ on:
 
 jobs:
   verify:
+    name: Lint, typecheck, test, audit, build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: pnpm
-      - name: Install
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
-        run: pnpm lint
-      - name: Format
-        run: pnpm format:check
+        run: pnpm run lint
+      - name: Format check
+        run: pnpm run format:check
       - name: Typecheck
-        run: pnpm typecheck
-      - name: Test with coverage
-        run: pnpm test:coverage
+        run: pnpm run typecheck
+      - name: Test with coverage thresholds
+        run: pnpm run test:coverage
       - name: Audit production dependencies (API runtime)
-        run: pnpm audit:prod
+        run: pnpm run audit:prod
       - name: Build
-        run: pnpm build
+        run: pnpm run build
 
   docker:
+    name: Docker compose build
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: verify
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Validate compose file
         run: docker compose config
       - name: Build API image
