@@ -17,7 +17,7 @@
     "@solanaguard/risk-engine": "workspace:*",
     "@solanaguard/solana": "workspace:*",
     "@solanaguard/types": "workspace:*",
-    "fastify": "^5.2.1"
+    "fastify": "^5.12.3"
   },
   "devDependencies": {
     "tsx": "^4.19.3"
