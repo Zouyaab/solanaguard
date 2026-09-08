@@ -1,4 +1,5 @@
 import type { FastifyBaseLogger, FastifyInstance } from "fastify";
+import { createErrorTracker } from "./error-tracking.js";
 
 /** Paths that must never appear in structured logs. */
 export const LOG_REDACT_PATHS = [
@@ -84,6 +85,7 @@ export function logServerError(
  * Response bodies stay free of stack traces. Rate-limit and validation shapes are preserved.
  */
 export function registerStructuredErrorLogging(app: FastifyInstance): void {
+  const tracker = createErrorTracker(app.log);
   app.setErrorHandler((error, request, reply) => {
     const statusCode =
       typeof error === "object" &&
@@ -94,17 +96,12 @@ export function registerStructuredErrorLogging(app: FastifyInstance): void {
         : 500;
 
     if (statusCode >= 500) {
-      logServerError(
-        request.log,
-        {
-          requestId: request.id,
-          route: request.routeOptions.url ?? request.url,
-          method: request.method,
-          statusCode,
-          errMessage: error instanceof Error ? error.message : String(error),
-        },
-        error,
-      );
+      tracker.captureException(error, {
+        requestId: request.id,
+        route: request.routeOptions.url ?? request.url,
+        method: request.method,
+        statusCode,
+      });
     }
 
     if (reply.sent) {
