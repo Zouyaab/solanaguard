@@ -1,0 +1,65 @@
+import type { TransactionAnalysisReport } from "@solanaguard/types";
+
+export function sampleAnalysisReport(): TransactionAnalysisReport {
+  return {
+    transaction: {
+      version: "legacy",
+      feePayer: "11111111111111111111111111111111",
+      recentBlockhash: "11111111111111111111111111111111",
+      accountKeys: [],
+      addressTableLookups: [],
+      lookupsUnresolved: false,
+      instructions: [],
+      signaturesBase58: [],
+      signed: false,
+      byteLength: 100,
+      source: "base64",
+      confirmation: null,
+      resolvedAccounts: [],
+      accountResolution: { attempted: false, found: 0, notFound: 0 },
+      curveClassification: { onCurve: 0, offCurve: 0, signerOffCurve: 0 },
+      notes: [],
+    },
+    evaluation: {
+      findings: [
+        {
+          ruleId: "demo-rule",
+          severity: "info",
+          title: "Self-transfer observed",
+          explanation: "Informational finding for UI tests.",
+          evidence: {},
+        },
+      ],
+      rulesEvaluated: 1,
+      rulesFired: 1,
+      note: "not a risk score",
+    },
+    score: {
+      total: 5,
+      cap: 100,
+      band: "informational",
+      contributions: [],
+      weights: { info: 5, unusual: 20, needs_review: 35 },
+      note: "not a proof of safety",
+    },
+    simulation: {
+      success: true,
+      error: null,
+      logs: [],
+      unitsConsumed: 1,
+      contextSlot: 1,
+      replacementBlockhash: null,
+      returnData: null,
+      innerInstructions: [],
+      accounts: [],
+      accountsRequested: [],
+      accountsReturned: false,
+      sigVerify: false,
+      replaceRecentBlockhash: true,
+      lookupsUnresolved: false,
+      note: "simulated in tests",
+    },
+    comparison: null,
+    note: "not a safety verdict",
+  };
+}
