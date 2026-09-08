@@ -28,13 +28,27 @@
     "start": "pnpm --filter @solanaguard/api start",
     "cli": "pnpm --filter @solanaguard/cli start"
   },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "@solanaguard/api": "workspace:*",
+    "@solanaguard/cli": "workspace:*",
+    "@solanaguard/sdk": "workspace:*",
+    "@solanaguard/web": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
-    "@solana/web3.js": "^1.98.4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^22.13.10",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
     "@vitest/coverage-v8": "^3.2.7",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.1.1",
+    "jsdom": "^30.0.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
