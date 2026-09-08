@@ -115,30 +115,31 @@ Expected JSON includes `"status":"ok"`. Metrics (no request payloads): `GET /api
 
 ### Development commands
 
-| Command                                | Purpose                                  |
-| -------------------------------------- | ---------------------------------------- |
-| `pnpm lint`                            | ESLint                                   |
-| `pnpm format:check`                    | Prettier check                           |
-| `pnpm typecheck`                       | TypeScript project references            |
-| `pnpm test`                            | Vitest (unit/integration)                |
-| `pnpm test:coverage`                   | Vitest with V8 coverage (70% thresholds) |
-| `pnpm build`                           | Build all workspace packages/apps        |
-| `pnpm dev`                             | API on `:3001`                           |
-| `pnpm audit --prod --audit-level=high` | Production dependency audit              |
+| Command                                | Purpose                                                     |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `pnpm lint`                            | ESLint (fails CI on error)                                  |
+| `pnpm format:check`                    | Prettier check                                              |
+| `pnpm typecheck`                       | TypeScript project references                               |
+| `pnpm test`                            | Vitest unit/integration + frontend component tests          |
+| `pnpm test:coverage`                   | Vitest with V8 coverage (70% thresholds; fails CI if under) |
+| `pnpm build`                           | Build all workspace packages/apps                           |
+| `pnpm dev`                             | API on `:3001`                                              |
+| `pnpm dev:web`                         | Dashboard on `:3000` (expects API URL; see below)           |
+| `pnpm dev:demo`                        | Wallet demo on `:5173` (Devnet wallet for signing only)     |
+| `pnpm audit --prod --audit-level=high` | Production dependency audit                                 |
+| `pnpm audit:prod`                      | Scoped API runtime audit used by CI                         |
 
-### Environment variables
+### Testing
 
-See [`.env.example`](./.env.example) and [docs/configuration.md](./docs/configuration.md). Notable:
+- Default suite: `pnpm test` / `pnpm test:coverage` — no Docker, no running API, no Solana Devnet, and `SOLANAGUARD_DEVNET_IT` unset.
+- Frontend tests (`apps/web`, `examples/wallet-demo`) mock the SDK client and wallet adapters; they do not open network sockets.
+- Opt-in live Devnet: `pnpm test:devnet` (not required for CI).
 
-- `LOG_LEVEL` — Fastify/Pino level (`info` default)
-- `NEXT_PUBLIC_SOLANAGUARD_API_URL` — dashboard API base URL
-- `SOLANAGUARD_BENCH_WARMUP` / `SOLANAGUARD_BENCH_ITERATIONS` — `pnpm bench`
-
-### Logging & security notes
+### Logging & error tracking
 
 - Structured JSON logs via Fastify/Pino; configure with `LOG_LEVEL`.
 - Authorization headers, cookies, and known secret body fields are redacted.
-- 5xx responses never include stack traces; errors log `requestId`, route, method, and status.
+- Unexpected 5xx failures go through `apps/api/src/error-tracking.ts` (requestId, route, method, statusCode) and never include stacks or private-key material in responses.
 - API bodies reject private-key / seed / password fields and oversized payloads.
 
 ### Troubleshooting
@@ -164,18 +165,20 @@ pnpm cli -- analyze --base64 <TX>
 pnpm cli -- analyze --json --no-simulation --base64 <TX>
 ```
 
-Dashboard (API must already be running):
+Dashboard (for local UI against a running API):
 
 ```bash
 pnpm dev:web
 # http://127.0.0.1:3000
+# Unit/component tests do not require this process.
 ```
 
-Wallet demo (API must already be running; Devnet wallet required to sign):
+Wallet demo (API for analyze; Devnet wallet only when you choose to sign):
 
 ```bash
-pnpm --filter @solanaguard/wallet-demo dev
+pnpm dev:demo
 # http://127.0.0.1:5173
+# DemoApp tests mock wallet + API and never hit Devnet.
 ```
 
 SDK (against a running API):
