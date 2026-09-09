@@ -48,7 +48,13 @@ Phase 19 adds root OSS community files (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_
 
 Phase 20 completes the documentation set (`docs/README.md` index, overview, configuration, rules, testing). Docs describe shipped behavior only.
 
-## Decision: no database in Phase 1
+## Decision: API composition vs route modules
+
+`apps/api/src/app.ts` boots Fastify, hardening, metrics, and OpenAPI, then registers focused route modules under `apps/api/src/routes/`. Domain error mapping lives in `rpc-errors.ts`. Transaction body parsing stays shared so validation is not duplicated per route.
+
+## Decision: analyzer compare orchestration
+
+`packages/analyzer/src/compare.ts` orchestrates expected-vs-simulated comparison. Effect derivation, instruction observations, and state/lamport observations live in dedicated modules so each responsibility stays testable without a >500 LOC monolith.
 
 Nothing is persisted. `DATABASE_URL` is parsed so later phases can add SQLite without renaming env vars. An empty value means "unused".
 

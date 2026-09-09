@@ -31,6 +31,7 @@ This index is the Phase 20 entry point. Analysis reports, scores, and simulation
 | [dependency-audit.md](./dependency-audit.md) | Production audit scope and known upstream |
 | [testing.md](./testing.md)                   | Unit, fixture, Devnet, and bench commands |
 | [benchmarks.md](./benchmarks.md)             | Measured micro-benchmarks                 |
+| [releasing.md](./releasing.md)               | Versioning, tags, GitHub Releases         |
 
 ## Community
 

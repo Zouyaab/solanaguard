@@ -14,7 +14,9 @@ pnpm build
 
 Unit tests live next to source (`*.test.ts`). Offline fixture pipeline tests live under `tests/` (Phase 17).
 
-Coverage uses the Vitest V8 provider with text + lcov reporters and enforced 70% thresholds for lines, statements, functions, and branches (`pnpm test:coverage`).
+Coverage uses the Vitest V8 provider with text + lcov reporters and enforced thresholds: **75%** lines/statements/functions and **70%** branches (`pnpm test:coverage`).
+
+`tests/offline-guarantee.test.ts` asserts `SOLANAGUARD_DEVNET_IT` is unset and that Devnet suites use the `*.devnet.test.ts` naming convention.
 
 ## Live Devnet (opt-in)
 

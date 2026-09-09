@@ -115,25 +115,30 @@ Expected JSON includes `"status":"ok"`. Metrics (no request payloads): `GET /api
 
 ### Development commands
 
-| Command                                | Purpose                                                     |
-| -------------------------------------- | ----------------------------------------------------------- |
-| `pnpm lint`                            | ESLint (fails CI on error)                                  |
-| `pnpm format:check`                    | Prettier check                                              |
-| `pnpm typecheck`                       | TypeScript project references                               |
-| `pnpm test`                            | Vitest unit/integration + frontend component tests          |
-| `pnpm test:coverage`                   | Vitest with V8 coverage (70% thresholds; fails CI if under) |
-| `pnpm build`                           | Build all workspace packages/apps                           |
-| `pnpm dev`                             | API on `:3001`                                              |
-| `pnpm dev:web`                         | Dashboard on `:3000` (expects API URL; see below)           |
-| `pnpm dev:demo`                        | Wallet demo on `:5173` (Devnet wallet for signing only)     |
-| `pnpm audit --prod --audit-level=high` | Production dependency audit                                 |
-| `pnpm audit:prod`                      | Scoped API runtime audit used by CI                         |
+| Command                                | Purpose                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| `pnpm lint`                            | ESLint (fails CI on error)                                             |
+| `pnpm format:check`                    | Prettier check                                                         |
+| `pnpm typecheck`                       | TypeScript project references                                          |
+| `pnpm test`                            | Vitest unit/integration + frontend component tests                     |
+| `pnpm test:coverage`                   | Vitest with V8 coverage (75% lines/statements/functions; 70% branches) |
+| `pnpm build`                           | Build all workspace packages/apps                                      |
+| `pnpm dev`                             | API on `:3001`                                                         |
+| `pnpm dev:web`                         | Dashboard on `:3000` (expects API URL; see below)                      |
+| `pnpm dev:demo`                        | Wallet demo on `:5173` (Devnet wallet for signing only)                |
+| `pnpm audit --prod --audit-level=high` | Production dependency audit                                            |
+| `pnpm audit:prod`                      | Scoped API runtime audit used by CI                                    |
 
 ### Testing
 
-- Default suite: `pnpm test` / `pnpm test:coverage` — no Docker, no running API, no Solana Devnet, and `SOLANAGUARD_DEVNET_IT` unset.
+- **DEFAULT TESTS = offline:** `pnpm test` / `pnpm test:coverage` — no Docker, no running API, no Solana Devnet/wallet, and `SOLANAGUARD_DEVNET_IT` unset.
 - Frontend tests (`apps/web`, `examples/wallet-demo`) mock the SDK client and wallet adapters; they do not open network sockets.
-- Opt-in live Devnet: `pnpm test:devnet` (not required for CI).
+- CI also runs `tests/offline-guarantee.test.ts` to prove the Devnet gate stays off.
+- **DEVNET TESTS = opt-in:** `pnpm test:devnet` (sets `SOLANAGUARD_DEVNET_IT=1`; not required for CI).
+
+### Releases
+
+See [docs/releasing.md](./docs/releasing.md). Tags `v*` create a GitHub Release; packages are not auto-published to npm.
 
 ### Logging & error tracking
 
@@ -211,12 +216,12 @@ See [docs/benchmarks.md](./docs/benchmarks.md). Do not invent latency numbers.
 ## Workspace layout
 
 ```text
-apps/api          Fastify HTTP service (analyze/simulate + OpenAPI in Phase 11)
+apps/api          Fastify HTTP service — routes in src/routes/ (system/rpc/transactions/analyze)
 cli               Developer CLI (full analyze commands in Phase 13)
 packages/types    Shared version and type constants
 packages/config   Environment parsing
 packages/solana   RPC wrapper (Phase 2)
-packages/analyzer    Transaction normalize, decode, resolve, curve class, simulate, compare (Phases 3–6, 9–10)
+packages/analyzer    Normalize, decode, resolve, curve class, simulate, compare (compare-* modules)
 packages/risk-engine Deterministic rules + transparent score (Phases 7–8)
 packages/sdk      Typed HTTP client for apps/api (Phase 12)
 apps/web          Next.js dashboard (Phase 14)
