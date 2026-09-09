@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   SolanaGuardApiError,
   SolanaGuardClient,
+  SolanaGuardNetworkError,
   SolanaGuardNotFoundError,
   SolanaGuardRequestError,
   analyzeTransaction,
@@ -160,5 +161,39 @@ describe("SolanaGuardClient", () => {
       fetch: fetchImpl as unknown as typeof fetch,
     });
     expect(report.score.band).toBe("no_findings");
+  });
+
+  it("rejects an empty baseUrl at construction", () => {
+    expect(() => new SolanaGuardClient({ baseUrl: "   " })).toThrow(/baseUrl/);
+  });
+
+  it("wraps network failures as SolanaGuardNetworkError", async () => {
+    const fetchImpl = vi.fn(async () => {
+      throw new TypeError("fetch failed");
+    });
+    const client = new SolanaGuardClient({
+      baseUrl: "http://127.0.0.1:3001",
+      fetch: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(client.health()).rejects.toBeInstanceOf(SolanaGuardNetworkError);
+  });
+
+  it("aborts when the request exceeds timeoutMs", async () => {
+    const fetchImpl = vi.fn((_url: string | URL, init?: RequestInit) => {
+      return new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+        if (signal) {
+          signal.addEventListener("abort", () => {
+            reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+          });
+        }
+      });
+    });
+    const client = new SolanaGuardClient({
+      baseUrl: "http://127.0.0.1:3001",
+      timeoutMs: 20,
+      fetch: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(client.health()).rejects.toBeInstanceOf(SolanaGuardNetworkError);
   });
 });

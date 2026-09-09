@@ -118,11 +118,15 @@ describe("metrics endpoint", () => {
     const body = response.json() as {
       requestsTotal: number;
       errorsTotal: number;
+      clientErrorTotal: number;
+      serverErrorTotal: number;
       requestDurationMsAvg: number;
       requestDurationMsMax: number;
     };
     expect(body.requestsTotal).toBeGreaterThanOrEqual(1);
     expect(body.errorsTotal).toBe(0);
+    expect(body.clientErrorTotal).toBe(0);
+    expect(body.serverErrorTotal).toBe(0);
     expect(JSON.stringify(body)).not.toMatch(/privateKey|authorization|base64/i);
     await app.close();
   });

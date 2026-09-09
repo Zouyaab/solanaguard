@@ -137,6 +137,62 @@ describe("evaluateRules", () => {
     expect(result.findings[0]?.severity).toBe("info");
   });
 
+  it("reports unsigned payloads as informational previews", () => {
+    const result = evaluateRules(transaction({ signed: false, signaturesBase58: [] }));
+    expect(result.findings.map((item) => item.ruleId)).toContain("unsigned_message");
+    expect(result.findings.find((item) => item.ruleId === "unsigned_message")?.severity).toBe(
+      "info",
+    );
+  });
+
+  it("reports unrecognized layouts as needs_review without claiming malice", () => {
+    const result = evaluateRules(
+      transaction({
+        instructions: [
+          instruction({
+            decodeStatus: "unrecognized_layout",
+            programId: "11111111111111111111111111111111",
+            programName: "system_program",
+          }),
+        ],
+      }),
+    );
+    expect(result.findings[0]?.ruleId).toBe("unrecognized_layout");
+    expect(result.findings[0]?.severity).toBe("needs_review");
+    expect(result.findings[0]?.explanation).not.toMatch(/\bmalicious\b/i);
+  });
+
+  it("reports unresolved program ids and unresolved lookups", () => {
+    const byStatus = evaluateRules(
+      transaction({
+        instructions: [
+          instruction({
+            decodeStatus: "unresolved_program_id",
+            programId: null,
+          }),
+        ],
+      }),
+    );
+    expect(byStatus.findings[0]?.ruleId).toBe("unresolved_program_id");
+
+    const byLookups = evaluateRules(transaction({ lookupsUnresolved: true }));
+    expect(byLookups.findings[0]?.ruleId).toBe("unresolved_program_id");
+    expect(byLookups.findings[0]?.evidence.lookupsUnresolved).toBe(true);
+  });
+
+  it("is deterministic for identical transactions", () => {
+    const input = transaction({
+      signed: false,
+      instructions: [
+        instruction({
+          decodeStatus: "unknown_program",
+          programId: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        }),
+      ],
+    });
+    expect(evaluateRules(input)).toEqual(evaluateRules(input));
+  });
+
   it("evaluates a custom list without the default unsigned rule", () => {
     const onlyUnknown: RiskRule = {
       id: "unknown_program",

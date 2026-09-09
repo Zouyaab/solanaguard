@@ -139,6 +139,58 @@ describe("scoreEvaluation", () => {
     ).toBe("elevated");
   });
 
+  it("uses strict band boundaries at 19/20 and 49/50", () => {
+    const nineteen = scoreEvaluation(evaluation([finding({ ruleId: "a", severity: "unusual" })]), {
+      weights: { unusual: 19 },
+    });
+    expect(nineteen.total).toBe(19);
+    expect(nineteen.band).toBe("informational");
+
+    const twenty = scoreEvaluation(evaluation([finding({ ruleId: "a", severity: "unusual" })]));
+    expect(twenty.total).toBe(20);
+    expect(twenty.band).toBe("elevated");
+
+    const fortyNine = scoreEvaluation(
+      evaluation([
+        finding({ ruleId: "a", severity: "unusual" }),
+        finding({ ruleId: "b", severity: "unusual" }),
+        finding({ ruleId: "c", severity: "info" }),
+        finding({ ruleId: "d", severity: "info" }),
+        finding({ ruleId: "e", severity: "info" }),
+      ]),
+      { weights: { unusual: 17, info: 5 } },
+    );
+    expect(fortyNine.total).toBe(49);
+    expect(fortyNine.band).toBe("elevated");
+
+    const fifty = scoreEvaluation(
+      evaluation([
+        finding({ ruleId: "a", severity: "needs_review" }),
+        finding({ ruleId: "b", severity: "unusual" }),
+      ]),
+      { weights: { needs_review: 30, unusual: 20 } },
+    );
+    expect(fifty.total).toBe(50);
+    expect(fifty.band).toBe("requires_review");
+  });
+
+  it("treats findings with zero total weight as no_findings", () => {
+    const score = scoreEvaluation(evaluation([finding({ ruleId: "a", severity: "info" })]), {
+      weights: { info: 0 },
+    });
+    expect(score.total).toBe(0);
+    expect(score.band).toBe("no_findings");
+    expect(score.contributions[0]?.points).toBe(0);
+  });
+
+  it("is deterministic for identical evaluations", () => {
+    const input = evaluation([
+      finding({ ruleId: "unsigned_message", severity: "info" }),
+      finding({ ruleId: "signer_off_curve", severity: "unusual" }),
+    ]);
+    expect(scoreEvaluation(input)).toEqual(scoreEvaluation(input));
+  });
+
   it("caps the total and still lists uncapped contribution points", () => {
     const many = Array.from({ length: 10 }, (_, index) =>
       finding({ ruleId: `r${index}`, severity: "needs_review" }),

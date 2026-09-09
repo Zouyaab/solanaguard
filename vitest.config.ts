@@ -52,9 +52,9 @@ export default defineConfig({
         "benchmarks/run.ts",
       ],
       thresholds: {
-        lines: 70,
-        statements: 70,
-        functions: 70,
+        lines: 75,
+        statements: 75,
+        functions: 75,
         branches: 70,
       },
     },
