@@ -279,4 +279,69 @@ describe("compareExpectedToSimulated", () => {
       ),
     ).toBe(true);
   });
+
+  it("matches CloseAccount when post-state lamports are zero", () => {
+    const comparison = compareExpectedToSimulated(
+      baseTransaction({
+        instructions: [
+          transferInstruction({
+            instructionType: "CloseAccount",
+            programName: "spl_token",
+            namedAccounts: [{ name: "account", index: 0, address: TO }],
+            args: {},
+          }),
+        ],
+      }),
+      baseSimulation({
+        accounts: [
+          {
+            address: TO,
+            returned: true,
+            lamports: "0",
+            owner: SYSTEM,
+            executable: false,
+            dataLength: 0,
+            dataBase64: null,
+          },
+        ],
+      }),
+    );
+    expect(
+      comparison.observations.some(
+        (item) => item.id.startsWith("close_") && item.status === "matched",
+      ),
+    ).toBe(true);
+  });
+
+  it("marks Assign incomplete when simulation omits post-state owner", () => {
+    const comparison = compareExpectedToSimulated(
+      baseTransaction({
+        instructions: [
+          transferInstruction({
+            instructionType: "Assign",
+            namedAccounts: [{ name: "account", index: 0, address: FROM }],
+            args: { owner: SYSTEM },
+          }),
+        ],
+      }),
+      baseSimulation({
+        accounts: [
+          {
+            address: FROM,
+            returned: true,
+            lamports: "5000",
+            owner: null,
+            executable: false,
+            dataLength: 0,
+            dataBase64: null,
+          },
+        ],
+      }),
+    );
+    expect(
+      comparison.observations.some(
+        (item) => item.status === "incomplete" && /owner/i.test(item.title),
+      ),
+    ).toBe(true);
+  });
 });
