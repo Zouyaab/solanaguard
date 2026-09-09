@@ -1,7 +1,7 @@
 import type { FastifyReply } from "fastify";
 import { TransactionNotFoundError } from "@solanaguard/analyzer";
 import { InvalidAddressError, InvalidTransactionError, RpcRequestError } from "@solanaguard/solana";
-import { logServerError } from "./logging.js";
+import { createErrorTracker } from "./error-tracking.js";
 
 /**
  * Map known domain errors to stable 4xx/5xx JSON bodies.
@@ -21,20 +21,14 @@ export function sendRpcError(reply: FastifyReply, error: unknown) {
   if (error instanceof RpcRequestError) {
     return reply.code(502).send({ error: "rpc_failed", message: error.message });
   }
-  const message = error instanceof Error ? error.message : "Unknown error";
   const request = reply.request;
   if (request) {
-    logServerError(
-      request.log,
-      {
-        requestId: request.id,
-        route: request.routeOptions.url ?? request.url,
-        method: request.method,
-        statusCode: 500,
-        errMessage: message,
-      },
-      error,
-    );
+    createErrorTracker(request.log).captureException(error, {
+      requestId: request.id,
+      route: request.routeOptions.url ?? request.url,
+      method: request.method,
+      statusCode: 500,
+    });
   }
-  return reply.code(500).send({ error: "internal", message });
+  return reply.code(500).send({ error: "internal", message: "Internal server error" });
 }
