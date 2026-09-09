@@ -5,11 +5,14 @@ on:
     branches: [main, master]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  verify:
-    name: Lint, typecheck, test, audit, build
+  lint:
+    name: Lint and format
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,12 +29,72 @@ jobs:
         run: pnpm run lint
       - name: Format check
         run: pnpm run format:check
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm run typecheck
+
+  test:
+    name: Test, coverage, and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prove default suite is offline
+        env:
+          SOLANAGUARD_DEVNET_IT: ""
+        run: |
+          test -z "${SOLANAGUARD_DEVNET_IT}"
+          pnpm exec vitest run tests/offline-guarantee.test.ts
       - name: Test with coverage thresholds
         run: pnpm run test:coverage
+        env:
+          SOLANAGUARD_DEVNET_IT: ""
       - name: Audit production dependencies (API runtime)
         run: pnpm run audit:prod
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint, typecheck, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm run build
 
@@ -39,7 +102,7 @@ jobs:
     name: Docker compose build
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: verify
+    needs: build
     steps:
       - name: Checkout
         uses: actions/checkout@v4

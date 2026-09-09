@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    name: Create GitHub Release from tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Publish GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          NOTES_FILE="$(mktemp)"
+          {
+            echo "## SolanaGuard ${TAG}"
+            echo
+            echo "See CHANGELOG.md for details."
+            echo
+            echo "Install: \`pnpm install --frozen-lockfile\`"
+            echo "Validate: \`pnpm test:coverage && pnpm build\`"
+          } > "${NOTES_FILE}"
+          gh release create "${TAG}" --title "SolanaGuard ${TAG}" --notes-file "${NOTES_FILE}"
