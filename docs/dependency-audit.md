@@ -7,14 +7,21 @@ audits that tree at `--audit-level=high`. This matches the Docker/runtime surfac
 
 ## Full workspace audit
 
-`pnpm audit --prod --audit-level=high` may still report high findings outside the API
-image, currently under:
+`pnpm audit --prod --audit-level=high` may still report findings outside the API
+image. As of the current lockfile:
 
-- `apps/web` → `next` → `sharp` / `postcss`
-- `examples/wallet-demo` → Solana wallet adapter → `react-native` / `metro` → `image-size`
+| Advisory surface | Path | Mitigation |
+| ---------------- | ---- | ---------- |
+| `sharp` (libvips / libheif) | `apps/web` → `next` → `sharp` | Workspace override `sharp: ^0.35.4` in `pnpm-workspace.yaml` |
+| `image-size` DoS | `examples/wallet-demo` → wallet-adapter → `react-native`/`metro` | No patched `image-size@>=2.0.3` on npm yet (latest published `2.0.2`); track upstream wallet-adapter / metro |
 
-Those packages are not included in the API container. Track upstream upgrades
-(`next`, wallet adapter) rather than ignoring the advisory with `|| true`.
+Those packages are **not** included in the API container. Do not silence audits with
+`|| true`. Re-run `pnpm audit --prod --audit-level=high` after Next / wallet-adapter upgrades.
 
-Workspace overrides in `pnpm-workspace.yaml` force newer `postcss` where the resolver
-can apply them.
+Workspace overrides also force newer `postcss` where the resolver can apply them.
+
+## Transitive dependency visibility
+
+pnpm stores the full graph in `pnpm-lock.yaml`. Evaluators that report
+`total_transitive_deps = 0` usually mis-parse pnpm lockfiles; use
+`pnpm list -r --depth Infinity` (or the lockfile) for the real graph.

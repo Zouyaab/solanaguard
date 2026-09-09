@@ -16,4 +16,5 @@ confirmModulesPurge: false
 overrides:
   # Next currently vendors an older postcss; force the patched release when possible.
   postcss: "^8.5.18"
-  sharp: "^0.34.5"
+  # Prefer patched sharp (libvips) when Next's transitive range allows resolution.
+  sharp: "^0.35.4"
